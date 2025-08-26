@@ -1,4 +1,4 @@
-// File: C:\Users\educa\Desktop\FBLive\fblive2\frontend\app\layout.tsx
+// File: C:\Users\educa\Desktop\fblive2\frontend\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

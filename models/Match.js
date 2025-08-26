@@ -9,7 +9,8 @@ const matchSchema = new mongoose.Schema({
   kickoffannounced: { type: Boolean, default: false },
   htannounced: { type: Boolean, default: false },
   ftannounced: { type: Boolean, default: false },
-  competition: { type: String, default: '' }
+  competition: { type: String, default: '' },
+  evaluatedIncidents: { type: [String], default: [] } // Store incident IDs that have been evaluated
 }, {
   timestamps: true
 });

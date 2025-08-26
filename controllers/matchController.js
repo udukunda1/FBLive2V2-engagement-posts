@@ -109,3 +109,220 @@ export const searchAndSaveMatch = async (req, res) => {
     });
   }
 };
+
+export const startLiveMatches = async (req, res) => {
+  try {
+    // Find matches with status="pending" and watch=true
+    const pendingMatches = await Match.find({ status: 'pending', watch: true });
+    
+    if (pendingMatches.length === 0) {
+      return res.json({ message: 'No pending matches to watch' });
+    }
+
+    console.log(`Starting live tracking for ${pendingMatches.length} matches`);
+
+    // Start polling every 20 seconds
+    const pollInterval = setInterval(async () => {
+      try {
+        // Get current valid matches (status="pending" and watch=true)
+        const currentMatches = await Match.find({ status: 'pending', watch: true });
+        
+        if (currentMatches.length === 0) {
+          console.log('No more matches to track, stopping polling');
+          clearInterval(pollInterval);
+          return;
+        }
+
+        console.log(`Polling ${currentMatches.length} matches...`);
+
+        // Process each match
+        for (const match of currentMatches) {
+          await processMatch(match);
+        }
+      } catch (error) {
+        console.error('Error in polling cycle:', error);
+      }
+    }, 20000); // 20 seconds
+
+    // Store the interval ID globally or in a way that can be accessed later if needed
+    global.liveMatchesInterval = pollInterval;
+
+    res.json({ 
+      message: `Started live tracking for ${pendingMatches.length} matches`,
+      matches: pendingMatches.map(m => ({ eventID: m.eventID, homeTeam: m.homeTeam, awayTeam: m.awayTeam }))
+    });
+
+  } catch (error) {
+    console.error('Error starting live matches:', error);
+    res.status(500).json({ error: 'Error starting live matches', details: error.message });
+  }
+};
+
+export const stopLiveMatches = async (req, res) => {
+  try {
+    if (global.liveMatchesInterval) {
+      clearInterval(global.liveMatchesInterval);
+      global.liveMatchesInterval = null;
+      console.log('Live matches polling stopped');
+      res.json({ message: 'Live matches polling stopped' });
+    } else {
+      res.json({ message: 'No active live matches polling to stop' });
+    }
+  } catch (error) {
+    console.error('Error stopping live matches:', error);
+    res.status(500).json({ error: 'Error stopping live matches', details: error.message });
+  }
+};
+
+async function processMatch(match) {
+  try {
+    // Send two requests: one for match status and one for incidents
+    console.log(`Processing match ${match.eventID}`);
+
+    const [statusResponse, incidentsResponse] = await Promise.all([
+      axios.get(`https://prod-cdn-public-api.livescore.com/v1/api/app/scoreboard/soccer/${match.eventID}?locale=en`),
+      axios.get(`https://prod-cdn-public-api.livescore.com/v1/api/app/incidents/soccer/${match.eventID}?locale=en`)
+    ]);
+
+    const matchStatus = statusResponse.data;
+    const matchIncidents = incidentsResponse.data;
+
+    // Check if match has started (Eps is not "NS")
+    if (matchStatus.Eps && matchStatus.Eps !== "NS") {
+      await handleMatchStatus(match, matchStatus);
+      await handleMatchIncidents(match, matchStatus, matchIncidents);
+    }
+  } catch (error) {
+    console.error(`Error processing match ${match.eventID}:`, error.message);
+  }
+}
+
+async function handleMatchStatus(match, matchStatus) {
+  // Check kickoff announcement
+  if (!match.kickoffannounced) {
+    console.log(`Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`);
+    match.kickoffannounced = true;
+    await match.save();
+  }
+
+  // Check half-time announcement
+  if (!match.htannounced && matchStatus.Eps === "HT") {
+    console.log(`⏸️ HT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    match.htannounced = true;
+    await match.save();
+  }
+
+  // Check full-time announcement
+  if (!match.ftannounced && matchStatus.Eps === "FT") {
+    console.log(`🏁 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    match.ftannounced = true;
+    match.status = "ended";
+    await match.save();
+  }
+}
+
+async function handleMatchIncidents(match, matchStatus, matchIncidents) {
+  if (!matchIncidents.Incs) return;
+
+  let incidentsArray = [];
+  let halfPrefix = "";
+
+  // Determine which half we're in and get the appropriate incidents array
+  if (matchStatus.Eps && typeof matchStatus.Eps === 'string' && matchStatus.Eps.includes("'")) {
+    const minute = parseInt(matchStatus.Eps.replace("'", ""));
+    
+    if (minute >= 1 && minute <= 45) {
+      // First half
+      incidentsArray = matchIncidents.Incs[1] || [];
+      halfPrefix = "1";
+    } else if (minute >= 46 && minute <= 90) {
+      // Second half
+      incidentsArray = matchIncidents.Incs[2] || [];
+      halfPrefix = "2";
+    }
+  }
+
+  if (incidentsArray.length === 0) return;
+
+  // Process each incident
+  for (let i = 0; i < incidentsArray.length; i++) {
+    const incident = incidentsArray[i];
+    const incidentId = `${halfPrefix}${i}`;
+
+    // Skip if incident already evaluated
+    if (match.evaluatedIncidents.includes(incidentId)) {
+      continue;
+    }
+
+    await evaluateIncident(match, incident, matchStatus, incidentId);
+  }
+}
+
+async function evaluateIncident(match, incident, matchStatus, incidentId) {
+  // Check if incident has last name (Ln) field
+  let hasLastName = false;
+  
+  // For incidents with nested structure (goals with assists)
+  if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].Ln) {
+    hasLastName = true;
+  }
+  // For direct incidents
+  else if (incident.Ln) {
+    hasLastName = true;
+  }
+  
+  // Skip incident if no last name found
+  if (!hasLastName) {
+    console.log(`Skipping incident ${incidentId} - no last name found`);
+    return;
+  }
+
+  // Add incident to evaluated list
+  match.evaluatedIncidents.push(incidentId);
+  await match.save();
+
+  // Handle different incident types
+  if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT === 36) {
+    // Goal with assist
+    console.log(`🚨 GOAAAL! 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`);
+    console.log(`⚽ ${incident.Incs[0].Ln} (${incident.Min}')`);
+    console.log(`🅰️ ${incident.Incs[1].Ln}`);
+  } else if (incident.IT === 36) {
+    // Goal
+    console.log(`🚨 GOAAAL! 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
+    console.log(`⚽ ${incident.Ln} (${incident.Min}')`);
+  } else if (incident.IT === 37) {
+    // Penalty goal
+    console.log(`🚨 GOAAAL! 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
+    console.log(`⚽ ${incident.Ln} (Penalty) (${incident.Min}')`);
+  } else if (incident.IT === 38) {
+    // Missed penalty
+    console.log(`🚨 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
+    console.log(`❌ ${incident.Ln} (Missed Penalty) (${incident.Min}')`);
+  } else if (incident.IT === 39) {
+    // Own goal
+    console.log(`🚨 GOAAAL! 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
+    console.log(`⚽ ${incident.Ln} (Own Goal) (${incident.Min}')`);
+  } else if (incident.IT === 62) {
+    // VAR check - no goal
+    console.log(`🚨 VAR CHECK 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
+    console.log(`❌ ${incident.Ln} (No Goal) (${incident.Min}')`);
+  } else if (incident.IT === 45) {
+    // Red card
+    console.log(`🚨 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    console.log(`🟥 Red Card: ${incident.Ln} (${incident.Min}')`);
+  } else if (incident.IT === 44) {
+    // Second yellow = red card
+    console.log(`🚨 🚨`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    console.log(`🟨🟨 = 🟥`);
+    console.log(`Red Card: ${incident.Ln} (${incident.Min}')`);
+  }
+}

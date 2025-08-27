@@ -270,15 +270,15 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
 }
 
 async function evaluateIncident(match, incident, matchStatus, incidentId) {
-  // Check if incident has last name (Ln) field
+  // Check if incident has last name (Ln) or player name (Pn) field
   let hasLastName = false;
   
   // For incidents with nested structure (goals with assists)
-  if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].Ln) {
+  if (!incident.IT && incident.Incs && incident.Incs[0] && (incident.Incs[0].Ln || incident.Incs[0].Pn)) {
     hasLastName = true;
   }
   // For direct incidents
-  else if (incident.Ln) {
+  else if (incident.Ln || incident.Pn) {
     hasLastName = true;
   }
   
@@ -308,7 +308,8 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
 
   // Helper function to format player name with optional first initial
   const formatPlayerName = (player) => {
-    return player.Fn && player.Fn[0] ? `${player.Fn[0]}. ${player.Ln}` : player.Ln;
+    const playerName = player.Ln || player.Pn; // Use Ln as primary, Pn as fallback
+    return player.Fn && player.Fn[0] ? `${player.Fn[0]}. ${playerName}` : playerName;
   };
 
   // Handle different incident types

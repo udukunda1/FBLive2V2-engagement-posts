@@ -290,7 +290,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   
   // Skip incident if it's not a supported type or if no last name found (except VAR checks)
   if (!supportedIncidentTypes.includes(actualIncidentType) || (!hasLastName && actualIncidentType !== 62)) {
-    console.log(`Skipping incident ${incidentId} - ${!supportedIncidentTypes.includes(actualIncidentType) ? 'unsupported type' : 'no last name found'}`);
+    console.log(`Skipping incident ${incidentId} - ${!supportedIncidentTypes.includes(actualIncidentType) ? 'unsupported incident type' : 'no last name found'}`);
     return;
   }
 

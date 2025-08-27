@@ -282,9 +282,15 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     hasLastName = true;
   }
   
-  // Skip incident if no last name found, except for VAR checks (type 62) which don't have player names
-  if (!hasLastName && incident.IT !== 62) {
-    console.log(`Skipping incident ${incidentId} - no last name found`);
+  // Define supported incident types
+  const supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 62];
+  
+  // Get the actual incident type (handle goal with assist case)
+  const actualIncidentType = !incident.IT && incident.Incs && incident.Incs[0] ? incident.Incs[0].IT : incident.IT;
+  
+  // Skip incident if it's not a supported type or if no last name found (except VAR checks)
+  if (!supportedIncidentTypes.includes(actualIncidentType) || (!hasLastName && actualIncidentType !== 62)) {
+    console.log(`Skipping incident ${incidentId} - ${!supportedIncidentTypes.includes(actualIncidentType) ? 'unsupported type' : 'no last name found'}`);
     return;
   }
 

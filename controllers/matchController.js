@@ -292,7 +292,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   if (!supportedIncidentTypes.includes(actualIncidentType) || (!hasLastName && actualIncidentType !== 62)) {
     // Only log when no last name found, skip logging for unsupported types
     if (supportedIncidentTypes.includes(actualIncidentType) && !hasLastName && actualIncidentType !== 62) {
-      console.log(`Skipping incident ${incidentId} - no last name found`);
+      console.log(`Skipping incident ${incidentId} - no last name or player name found`);
     }
     return;
   }

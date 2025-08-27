@@ -383,7 +383,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(assistMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n${goalMessage}\n${assistMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n${goalMessage}\n${assistMessage}`);
   } else if (incident.IT === 36) {
     // Goal
     const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -393,7 +393,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(goalMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n${goalMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n${goalMessage}`);
   } else if (incident.IT === 37) {
     // Penalty goal
     const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -403,7 +403,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(goalMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n${goalMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n${goalMessage}`);
   } else if (incident.IT === 38) {
     // Missed penalty
     const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -413,7 +413,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(penaltyMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n${penaltyMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n${penaltyMessage}`);
   } else if (incident.IT === 39) {
     // Own goal
     const scoreMessage = `⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -423,7 +423,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(goalMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n${goalMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n${goalMessage}`);
   } else if (incident.IT === 62) {
     // VAR check - no goal
     const varMessage = `🚨VAR CHECK🚨`;
@@ -435,7 +435,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(decisionMessage);
     
     // Post to Facebook
-    await postToFacebook(`${varMessage}\n${scoreMessage}\n${decisionMessage}`);
+    await postToFacebook(`${varMessage}\n${scoreMessage}\n\n${decisionMessage}`);
   } else if (incident.IT === 45) {
     // Red card
     const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
@@ -445,7 +445,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(cardMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n${cardMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n${cardMessage}`);
   } else if (incident.IT === 44) {
     // Second yellow = red card
     const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
@@ -457,6 +457,6 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(cardMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n${yellowMessage}\n${cardMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n${yellowMessage}\n${cardMessage}`);
   }
 }

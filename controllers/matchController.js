@@ -209,8 +209,8 @@ async function processMatch(match) {
     const matchStatus = statusResponse.data;
     const matchIncidents = incidentsResponse.data;
 
-    // Check if match has started (Eps is not "NS")
-    if (matchStatus.Eps && matchStatus.Eps !== "NS") {
+    // Check if match has started (Eps is not "NS", "Delay", or "Postponed")
+    if (matchStatus.Eps && matchStatus.Eps !== "NS" && matchStatus.Eps !== "Delay" && matchStatus.Eps !== "Postponed") {
       await handleMatchStatus(match, matchStatus);
       await handleMatchIncidents(match, matchStatus, matchIncidents);
     }

@@ -282,8 +282,8 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     hasLastName = true;
   }
   
-  // Skip incident if no last name found
-  if (!hasLastName) {
+  // Skip incident if no last name found, except for VAR checks (type 62) which don't have player names
+  if (!hasLastName && incident.IT !== 62) {
     console.log(`Skipping incident ${incidentId} - no last name found`);
     return;
   }
@@ -317,7 +317,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   } else if (incident.IT === 62) {
     // VAR check - no goal
     console.log(`🚨VAR CHECK🚨`);
-    console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
     console.log(`❌ VAR No Goal (${incident.Min}')`);
   } else if (incident.IT === 45) {
     // Red card

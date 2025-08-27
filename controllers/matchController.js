@@ -317,8 +317,8 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   } else if (incident.IT === 62) {
     // VAR check - no goal
     console.log(`🚨VAR CHECK🚨`);
-    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`❌ ${incident.Fn[0]}. ${incident.Ln} (No Goal) (${incident.Min}')`);
+    console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    console.log(`❌ VAR No Goal (${incident.Min}')`);
   } else if (incident.IT === 45) {
     // Red card
     console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);

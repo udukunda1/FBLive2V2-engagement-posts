@@ -215,6 +215,9 @@ async function handleMatchStatus(match, matchStatus) {
         console.error("Error posting to Facebook:", error.response?.data || error.message);
       }
     }
+    else {
+      console.log("No access token or page ID found");
+    }
   };
 
   // Check kickoff announcement
@@ -362,6 +365,9 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
       } catch (error) {
         console.error("Error posting to Facebook:", error.response?.data || error.message);
       }
+    }
+    else {
+      console.log("No access token or page ID found");
     }
   };
 

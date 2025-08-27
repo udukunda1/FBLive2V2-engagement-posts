@@ -247,7 +247,18 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
   // Process each incident
   for (let i = 0; i < incidentsArray.length; i++) {
     const incident = incidentsArray[i];
-    const incidentId = `${halfPrefix}${i}`;
+    
+    // Determine incident type (IT) for uniqueness
+    let incidentType;
+    if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT === 36) {
+      // Goal with assist
+      incidentType = 36;
+    } else {
+      // Other incidents
+      incidentType = incident.IT;
+    }
+    
+    const incidentId = `${halfPrefix}${i}_${incidentType}`;
 
     // Skip if incident already evaluated
     if (match.evaluatedIncidents.includes(incidentId)) {

@@ -428,7 +428,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // VAR check - no goal
     const varMessage = `🚨VAR CHECK🚨`;
     const scoreMessage = `⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
-    const decisionMessage = `❌ ${incident.Fn && incident.Ln ? formatPlayerName(incident) : `${incident.IR}`} (${formatMinute(incident)})`;
+    const decisionMessage = `❌ ${incident.Fn && incident.Ln ? `${formatPlayerName(incident)} (${incident.IR})` : `${incident.IR}` } (${formatMinute(incident)})`;
     
     console.log(varMessage);
     console.log(scoreMessage);

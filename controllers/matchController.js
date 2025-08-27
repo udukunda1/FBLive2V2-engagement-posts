@@ -303,41 +303,46 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     return incident.MinEx ? `${incident.Min}+${incident.MinEx}'` : `${incident.Min}'`;
   };
 
+  // Helper function to format player name with optional first initial
+  const formatPlayerName = (player) => {
+    return player.Fn && player.Fn[0] ? `${player.Fn[0]}. ${player.Ln}` : player.Ln;
+  };
+
   // Handle different incident types
   if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT === 36) {
     // Goal with assist
     console.log(`⏱️Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${incident.Incs[0].Fn[0]}. ${incident.Incs[0].Ln} (${formatMinute(incident)})`);
-    console.log(`🅰️ ${incident.Incs[1].Fn[0]}. ${incident.Incs[1].Ln}`);
+    console.log(`⚽ ${formatPlayerName(incident.Incs[0])} (${formatMinute(incident)})`);
+    console.log(`🅰️ ${formatPlayerName(incident.Incs[1])}`);
   } else if (incident.IT === 36) {
     // Goal
     console.log(`⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${incident.Fn[0]}. ${incident.Ln} (${formatMinute(incident)})`);
+    console.log(`⚽ ${formatPlayerName(incident)} (${formatMinute(incident)})`);
   } else if (incident.IT === 37) {
     // Penalty goal
     console.log(`⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${incident.Fn[0]}. ${incident.Ln} (Penalty) (${formatMinute(incident)})`);
+    console.log(`⚽ ${formatPlayerName(incident)} (Penalty) (${formatMinute(incident)})`);
   } else if (incident.IT === 38) {
     // Missed penalty
     console.log(`⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`❌ ${incident.Fn[0]}. ${incident.Ln} (Missed Penalty) (${formatMinute(incident)})`);
+    console.log(`❌ ${formatPlayerName(incident)} (Missed Penalty) (${formatMinute(incident)})`);
   } else if (incident.IT === 39) {
     // Own goal
     console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${incident.Fn[0]}. ${incident.Ln} (OG) (${formatMinute(incident)})`);
+    console.log(`⚽ ${formatPlayerName(incident)} (OG) (${formatMinute(incident)})`);
   } else if (incident.IT === 62) {
     // VAR check - no goal
     console.log(`🚨VAR CHECK🚨`);
     console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`❌ ${incident.Fn && incident.Ln ? `${incident.Fn[0]}. ${incident.Ln} (${incident.IR})` : `${incident.IR}`} (${formatMinute(incident)})`);
+    console.log(`❌ ${incident.Fn && incident.Ln ? formatPlayerName(incident) : `${incident.IR}`} (${formatMinute(incident)})`);
   } else if (incident.IT === 45) {
     // Red card
     console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
-    console.log(`🟥 Red Card: ${incident.Fn[0]}. ${incident.Ln} (${formatMinute(incident)})`);
+    console.log(`🟥 Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`);
   } else if (incident.IT === 44) {
     // Second yellow = red card
     console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
     console.log(`🟨🟨 = 🟥`);
-    console.log(`Red Card: ${incident.Fn[0]}. ${incident.Ln} (${formatMinute(incident)})`);
+    console.log(`Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`);
   }
 }

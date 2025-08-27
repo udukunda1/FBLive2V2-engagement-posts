@@ -4,7 +4,7 @@ import axios from 'axios';
 export const getAllMatches = async (req, res) => {
   try {
     // Get all matches and sort by matchDateTime (newest first)
-    const matches = await Match.find().sort({ matchDateTime: -1 });
+    const matches = await Match.find().sort({ matchDateTime: 1 });
     res.json(matches);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching matches', details: error.message });

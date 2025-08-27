@@ -164,7 +164,7 @@ export const startLiveMatches = async (req, res) => {
       } catch (error) {
         console.error('Error in polling cycle:', error);
       }
-    }, 30000); // 20 seconds
+    }, 30000); // 30 seconds
 
     // Store the interval ID globally or in a way that can be accessed later if needed
     global.liveMatchesInterval = pollInterval;

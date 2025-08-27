@@ -3,6 +3,7 @@ export interface Match {
   eventID: string;
   homeTeam: string;
   awayTeam: string;
+  matchDateTime?: string; // ISO date string
   status: 'pending' | 'ended';
   watch: boolean;
   kickoffannounced: boolean;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Match } from '../types/match';
-import { Eye, EyeOff, Trash2, Edit, Save, X, Calendar, Users } from 'lucide-react';
+import { Eye, EyeOff, Trash2, Edit, Save, X, Calendar, Users, Clock } from 'lucide-react';
 
 interface MatchListProps {
   matches: Match[];
@@ -61,10 +61,71 @@ export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpd
     );
   };
 
+  const formatMatchDateTime = (dateTimeString?: string) => {
+    if (!dateTimeString) return null;
+    
+    try {
+      const date = new Date(dateTimeString);
+      const now = new Date();
+      const isToday = date.toDateString() === now.toDateString();
+      const isTomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000).toDateString() === date.toDateString();
+      
+      const timeString = date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      
+      if (isToday) {
+        return `Today at ${timeString}`;
+      } else if (isTomorrow) {
+        return `Tomorrow at ${timeString}`;
+      } else {
+        return date.toLocaleDateString('en-US', { 
+          weekday: 'short',
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true 
+        });
+      }
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const getMatchTimeStatus = (dateTimeString?: string) => {
+    if (!dateTimeString) return null;
+    
+    try {
+      const matchTime = new Date(dateTimeString);
+      const now = new Date();
+      const timeDiff = matchTime.getTime() - now.getTime();
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+      
+      if (timeDiff < 0) {
+        // Match has already started or ended
+        return { status: 'overdue', color: 'text-red-600', bgColor: 'bg-red-50' };
+      } else if (hoursDiff <= 1) {
+        // Match starts within 1 hour
+        return { status: 'starting-soon', color: 'text-orange-600', bgColor: 'bg-orange-50' };
+      } else if (hoursDiff <= 24) {
+        // Match starts within 24 hours
+        return { status: 'upcoming', color: 'text-blue-600', bgColor: 'bg-blue-50' };
+      } else {
+        // Match is far in the future
+        return { status: 'future', color: 'text-gray-600', bgColor: 'bg-gray-50' };
+      }
+    } catch (error) {
+      return null;
+    }
+  };
+
   return (
     <div className="space-y-4">
       {matches.map((match) => (
-        <div key={match._id} className="border border-gray-200 rounded-lg p-4 bg-white">
+        <div key={match._id} className={`border border-gray-200 rounded-lg p-4 ${match.matchDateTime ? getMatchTimeStatus(match.matchDateTime)?.bgColor || 'bg-white' : 'bg-white'}`}>
           {editingId === match._id ? (
             // Edit mode
             <div className="space-y-3">
@@ -131,6 +192,14 @@ export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpd
                     <Calendar className="h-4 w-4 mr-1" />
                     <span>Event ID: {match.eventID}</span>
                   </div>
+                  {match.matchDateTime && (
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span className={`font-medium ${getMatchTimeStatus(match.matchDateTime)?.color || 'text-blue-600'}`}>
+                        {formatMatchDateTime(match.matchDateTime)}
+                      </span>
+                    </div>
+                  )}
                   {match.competition && (
                     <div className="flex items-center">
                       <Users className="h-4 w-4 mr-1" />

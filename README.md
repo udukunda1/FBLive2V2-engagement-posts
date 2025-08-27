@@ -210,6 +210,7 @@ Matches are stored with the following fields:
 - `eventID` - Unique match identifier
 - `homeTeam` - Home team name
 - `awayTeam` - Away team name
+- `matchDateTime` - Match date and time (local time, +2 hours from UTC)
 - `status` - Match status (pending/ended)
 - `watch` - Whether to track this match
 - `kickoffannounced` - Whether kickoff was announced
@@ -227,3 +228,7 @@ Matches are stored with the following fields:
 - Reduced console logging noise
 - Better unique incident ID generation
 - Support for first name initials when available
+- Added match date/time parsing and storage from Livescore API
+- Frontend display of match times with smart formatting (Today, Tomorrow, etc.)
+- Visual indicators for match timing (overdue, starting soon, upcoming, future)
+- Automatic sorting of matches by date/time

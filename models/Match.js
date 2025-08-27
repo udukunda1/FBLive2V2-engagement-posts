@@ -4,6 +4,7 @@ const matchSchema = new mongoose.Schema({
   eventID: { type: String, required: true, unique: true },
   homeTeam: { type: String, required: true },
   awayTeam: { type: String, required: true },
+  matchDateTime: { type: Date }, // Match date and time (local time, +2 hours from UTC)
   status: { type: String, default: 'pending' },
   watch: { type: Boolean, default: false },
   kickoffannounced: { type: Boolean, default: false },

@@ -3,7 +3,8 @@ import axios from 'axios';
 
 export const getAllMatches = async (req, res) => {
   try {
-    const matches = await Match.find();
+    // Get all matches and sort by matchDateTime (newest first)
+    const matches = await Match.find().sort({ matchDateTime: -1 });
     res.json(matches);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching matches', details: error.message });
@@ -86,12 +87,33 @@ export const searchAndSaveMatch = async (req, res) => {
       return res.status(404).json({ error: 'Match not found or invalid data' });
     }
 
+    // Parse match date and time from Esd (YYYYMMDDHHMMSS format)
+    let matchDateTime = null;
+    if (matchData.Esd) {
+      try {
+        // Convert to string first, then parse the date string (YYYYMMDDHHMMSS)
+        const esdString = matchData.Esd.toString();
+        const year = parseInt(esdString.substring(0, 4));
+        const month = parseInt(esdString.substring(4, 6)) - 1; // Month is 0-indexed
+        const day = parseInt(esdString.substring(6, 8));
+        const hour = parseInt(esdString.substring(8, 10));
+        const minute = parseInt(esdString.substring(10, 12));
+        
+        // Create Date object in local time (already adjusted by 2 hours)
+        matchDateTime = new Date(year, month, day, hour + 2, minute);
+      } catch (error) {
+        console.error('Error parsing match date/time:', error);
+        matchDateTime = null;
+      }
+    }
+
     // Create new match with data from Livescore API
     match = new Match({
       eventID: matchId,
       homeTeam: matchData.T1[0].Nm,
       awayTeam: matchData.T2[0].Nm,
       competition: matchData.Stg?.Snm || '',
+      matchDateTime: matchDateTime, // Store the parsed date/time
       status: 'pending',
       watch: false,
       kickoffannounced: false,

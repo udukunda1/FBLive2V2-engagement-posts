@@ -152,10 +152,45 @@ npm install
 ```
 
 2. Set up environment variables:
+   - Copy `config.env.example` to `.env`
+   - Update the values in `.env` with your actual credentials
+
 ```bash
-MONGODB_URI=mongodb://localhost:27017/fblive2
-PORT=3001
+# Copy the example file
+cp config.env.example .env
+
+# Edit .env file with your actual values
 ```
+
+**Required Environment Variables:**
+```bash
+# MongoDB Configuration
+MONGODB_URI=mongodb://localhost:27017/fblive2
+
+# Server Configuration  
+PORT=3001
+
+# Facebook API Configuration
+FACEBOOK_ACCESS_TOKEN=your_facebook_access_token_here
+FACEBOOK_PAGE_ID=your_facebook_page_id_here
+
+# Optional: Node Environment
+NODE_ENV=development
+```
+
+**Facebook API Setup:**
+1. Go to [Facebook Developers](https://developers.facebook.com/)
+2. Create a new app or use an existing one
+3. Get your Page Access Token
+4. Get your Facebook Page ID
+5. Add these to your `.env` file
+
+**Environment Variables Explained:**
+- `MONGODB_URI`: MongoDB connection string (default: localhost:27017/fblive2)
+- `PORT`: Server port number (default: 3001)
+- `FACEBOOK_ACCESS_TOKEN`: Your Facebook Page Access Token for posting updates
+- `FACEBOOK_PAGE_ID`: Your Facebook Page ID where posts will be published
+- `NODE_ENV`: Environment mode (development/production)
 
 3. Start the server:
 ```bash

@@ -6,10 +6,14 @@ A Node.js application for tracking live football matches with real-time updates 
 
 - Search and save matches from Livescore API
 - Live match tracking with 20-second polling intervals
-- Real-time incident notifications (goals, cards, penalties, etc.)
+- Real-time incident notifications (goals, cards, penalties, VAR checks, etc.)
 - Match status tracking (kickoff, half-time, full-time)
 - Team name customization
 - Watch/unwatch matches
+- Enhanced incident handling with VAR support
+- Player name fallback system (Ln/Pn)
+- Performance optimizations with incident type filtering
+- Added time (injury time) support
 
 ## API Endpoints
 
@@ -44,7 +48,7 @@ A Node.js application for tracking live football matches with real-time updates 
   - `Incs[1]` - First half incidents array
   - `Incs[2]` - Second half incidents array
   - Incident types:
-    - `IT: 36` - Goal
+    - `IT: 36` - Goal (including goals with assists)
     - `IT: 37` - Penalty goal
     - `IT: 38` - Missed penalty
     - `IT: 39` - Own goal
@@ -62,6 +66,8 @@ The live tracking system polls every 20 seconds and provides:
 - **Full-time**: Shows final score and marks match as ended
 
 ### Incident Notifications
+
+#### Supported Incident Types
 - **Goals** (IT: 36) - Regular goals with scorer and assist
 - **Penalty Goals** (IT: 37) - Goals from penalties
 - **Missed Penalties** (IT: 38) - Penalties that were missed
@@ -70,17 +76,73 @@ The live tracking system polls every 20 seconds and provides:
 - **Red Cards** (IT: 45) - Direct red cards
 - **Second Yellow = Red** (IT: 44) - Red cards from second yellow
 
+#### Enhanced Features
+- **VAR Support**: Handles VAR decisions and goal disallowances
+- **Player Name Fallback**: Uses `Ln` (last name) as primary, `Pn` (player name) as fallback
+- **First Name Initials**: Displays first name initials when available (e.g., "J. Smith")
+- **Added Time Support**: Shows injury time in format "45+3'" when available
+- **Unique Incident IDs**: Prevents duplicate processing with enhanced ID generation
+- **Performance Optimization**: Only processes supported incident types
+
 ### Console Output Examples
+
+#### Regular Goals
 ```
-🚨 GOAAAL! 🚨
+⏱️Live: Manchester United 1–0 Liverpool
+⚽ M. Rashford (23')
+��️ B. Fernandes
+```
+
+#### Goals with Added Time
+```
+⏱️Live: Manchester United 1–0 Liverpool
+⚽ M. Rashford (45+3')
+```
+
+#### VAR Decisions
+```
+🚨VAR CHECK🚨
 ⏱️ Live: Manchester United 1–0 Liverpool
-⚽ Marcus Rashford (23')
-🅰️ Bruno Fernandes
-
-⏸️ HT: Manchester United 1–0 Liverpool
-
-🟥 Red Card: Virgil van Dijk (45')
+❌ M. Rashford (VAR No Goal) (45+3')
 ```
+
+#### Cards
+```
+⏱️ Live: Manchester United 1–0 Liverpool
+🟥 Red Card: V. van Dijk (45')
+```
+
+#### Second Yellow = Red
+```
+⏱️ Live: Manchester United 1–0 Liverpool
+🟨🟨 = 🟥
+Red Card: V. van Dijk (45')
+```
+
+#### Match Status
+```
+Kick off: Manchester United 0–0 Liverpool
+⏸️ HT: Manchester United 1–0 Liverpool
+🏁 FT: Manchester United 2–1 Liverpool
+```
+
+## Technical Improvements
+
+### Incident Processing
+- **Unique ID Generation**: Uses format `${halfPrefix}${index}_${incidentType}` for regular incidents
+- **VAR Incident Handling**: Uses base ID `${halfPrefix}${index}` for VAR incidents to replace original incidents
+- **Player Name Detection**: Checks for both `Ln` and `Pn` fields with fallback logic
+- **First Name Handling**: Safely handles cases where first name initials are not available
+
+### Performance Optimizations
+- **Incident Type Filtering**: Only processes supported incident types (36, 37, 38, 39, 44, 45, 62)
+- **Reduced Console Noise**: Only logs incidents with missing player names, not unsupported types
+- **Early Exit Logic**: Skips processing for unsupported or invalid incidents
+
+### Data Structure Handling
+- **Nested Incident Structure**: Handles goals with assists (`incident.Incs[0]`)
+- **Added Time Support**: Processes `MinEx` property for injury time display
+- **Flexible Player Names**: Works with various player name field combinations
 
 ## Setup
 
@@ -119,4 +181,14 @@ Matches are stored with the following fields:
 - `htannounced` - Whether half-time was announced
 - `ftannounced` - Whether full-time was announced
 - `competition` - Competition name
-- `evaluatedIncidents` - Array of processed incident IDs
+- `evaluatedIncidents` - Array of processed incident IDs (prevents duplicate processing)
+
+## Recent Updates
+
+- Enhanced VAR incident handling with player name support
+- Added injury time display (e.g., "45+3'")
+- Improved player name fallback system (Ln/Pn)
+- Performance optimizations with incident type filtering
+- Reduced console logging noise
+- Better unique incident ID generation
+- Support for first name initials when available

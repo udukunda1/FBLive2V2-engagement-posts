@@ -198,23 +198,57 @@ async function processMatch(match) {
 }
 
 async function handleMatchStatus(match, matchStatus) {
+  // Facebook posting helper function
+  const postToFacebook = async (message) => {
+    const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
+    const page_id = process.env.FACEBOOK_PAGE_ID;
+    
+    if (access_token && page_id) {
+      try {
+        const data = {
+          message: message,
+          access_token: access_token
+        };
+        const fbResponse = await axios.post(`https://graph.facebook.com/v23.0/${page_id}/feed`, null, { params: data });
+        console.log(message + " - Posted to FB");
+      } catch (error) {
+        console.error("Error posting to Facebook:", error.response?.data || error.message);
+      }
+    }
+  };
+
   // Check kickoff announcement
   if (!match.kickoffannounced) {
-    console.log(`Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`);
+    const message = `Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`;
+    console.log(message);
+    
+    // Post to Facebook
+    await postToFacebook(message);
+    
     match.kickoffannounced = true;
     await match.save();
   }
 
   // Check half-time announcement
   if (!match.htannounced && matchStatus.Eps === "HT") {
-    console.log(`⏸️ HT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    const message = `⏸️ HT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    console.log(message);
+    
+    // Post to Facebook
+    await postToFacebook(message);
+    
     match.htannounced = true;
     await match.save();
   }
 
   // Check full-time announcement
   if (!match.ftannounced && matchStatus.Eps === "FT") {
-    console.log(`🏁 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
+    const message = `🏁 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    console.log(message);
+    
+    // Post to Facebook
+    await postToFacebook(message);
+    
     match.ftannounced = true;
     match.status = "ended";
     await match.save();
@@ -312,41 +346,111 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     return player.Fn && player.Fn[0] ? `${player.Fn[0]}. ${playerName}` : playerName;
   };
 
+  // Facebook posting helper function
+  const postToFacebook = async (message) => {
+    const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
+    const page_id = process.env.FACEBOOK_PAGE_ID;
+    
+    if (access_token && page_id) {
+      try {
+        const data = {
+          message: message,
+          access_token: access_token
+        };
+        const fbResponse = await axios.post(`https://graph.facebook.com/v23.0/${page_id}/feed`, null, { params: data });
+        console.log(message + " - Posted to FB");
+      } catch (error) {
+        console.error("Error posting to Facebook:", error.response?.data || error.message);
+      }
+    }
+  };
+
   // Handle different incident types
   if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT === 36) {
     // Goal with assist
-    console.log(`⏱️Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${formatPlayerName(incident.Incs[0])} (${formatMinute(incident)})`);
-    console.log(`🅰️ ${formatPlayerName(incident.Incs[1])}`);
+    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`;
+    const goalMessage = `⚽ ${formatPlayerName(incident.Incs[0])} (${formatMinute(incident)})`;
+    const assistMessage = `🅰️ ${formatPlayerName(incident.Incs[1])}`;
+    
+    console.log(scoreMessage);
+    console.log(goalMessage);
+    console.log(assistMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n${goalMessage}\n${assistMessage}`);
   } else if (incident.IT === 36) {
     // Goal
-    console.log(`⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${formatPlayerName(incident)} (${formatMinute(incident)})`);
+    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const goalMessage = `⚽ ${formatPlayerName(incident)} (${formatMinute(incident)})`;
+    
+    console.log(scoreMessage);
+    console.log(goalMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n${goalMessage}`);
   } else if (incident.IT === 37) {
     // Penalty goal
-    console.log(`⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${formatPlayerName(incident)} (Penalty) (${formatMinute(incident)})`);
+    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const goalMessage = `⚽ ${formatPlayerName(incident)} (Penalty) (${formatMinute(incident)})`;
+    
+    console.log(scoreMessage);
+    console.log(goalMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n${goalMessage}`);
   } else if (incident.IT === 38) {
     // Missed penalty
-    console.log(`⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`❌ ${formatPlayerName(incident)} (Missed Penalty) (${formatMinute(incident)})`);
+    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const penaltyMessage = `❌ ${formatPlayerName(incident)} (Missed Penalty) (${formatMinute(incident)})`;
+    
+    console.log(scoreMessage);
+    console.log(penaltyMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n${penaltyMessage}`);
   } else if (incident.IT === 39) {
     // Own goal
-    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`⚽ ${formatPlayerName(incident)} (OG) (${formatMinute(incident)})`);
+    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const goalMessage = `⚽ ${formatPlayerName(incident)} (OG) (${formatMinute(incident)})`;
+    
+    console.log(scoreMessage);
+    console.log(goalMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n${goalMessage}`);
   } else if (incident.IT === 62) {
     // VAR check - no goal
-    console.log(`🚨VAR CHECK🚨`);
-    console.log(`⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`);
-    console.log(`❌ ${incident.Fn && incident.Ln ? formatPlayerName(incident) : `${incident.IR}`} (${formatMinute(incident)})`);
+    const varMessage = `🚨VAR CHECK🚨`;
+    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const decisionMessage = `❌ ${incident.Fn && incident.Ln ? formatPlayerName(incident) : `${incident.IR}`} (${formatMinute(incident)})`;
+    
+    console.log(varMessage);
+    console.log(scoreMessage);
+    console.log(decisionMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${varMessage}\n${scoreMessage}\n${decisionMessage}`);
   } else if (incident.IT === 45) {
     // Red card
-    console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
-    console.log(`🟥 Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`);
+    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const cardMessage = `🟥 Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
+    
+    console.log(scoreMessage);
+    console.log(cardMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n${cardMessage}`);
   } else if (incident.IT === 44) {
     // Second yellow = red card
-    console.log(`⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`);
-    console.log(`🟨🟨 = 🟥`);
-    console.log(`Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`);
+    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const yellowMessage = `🟨🟨 = 🟥`;
+    const cardMessage = `Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
+    
+    console.log(scoreMessage);
+    console.log(yellowMessage);
+    console.log(cardMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n${yellowMessage}\n${cardMessage}`);
   }
 }

@@ -288,6 +288,22 @@ async function handleMatchStatus(match, matchStatus) {
     match.status = "ended";
     await match.save();
   }
+
+  // Check after penalties announcement
+  if (!match.ftannounced && matchStatus.Eps === "AP") {
+    const ftMessage = `🏁 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const penMessage = `🥅Pen: ${match.homeTeam} ${matchStatus.Trp1}–${matchStatus.Trp2} ${match.awayTeam}`;
+    
+    console.log(ftMessage);
+    console.log(penMessage);
+    
+    // Post to Facebook
+    await postToFacebook(`${ftMessage}\n\n${penMessage}`);
+    
+    match.ftannounced = true;
+    match.status = "ended";
+    await match.save();
+  }
 }
 
 async function handleMatchIncidents(match, matchStatus, matchIncidents) {

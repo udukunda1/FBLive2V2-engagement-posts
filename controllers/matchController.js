@@ -324,6 +324,10 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
       // Second half
       incidentsArray = matchIncidents.Incs[2] || [];
       halfPrefix = "2";
+    } else if (minute > 90) {
+      // Extra time
+      incidentsArray = matchIncidents.Incs[3] || [];
+      halfPrefix = "3";
     }
   }
 
@@ -335,9 +339,9 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
     
     // Determine incident type (IT) for uniqueness
     let incidentType;
-    if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT === 36) {
+    if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT) {
       // Goal with assist
-      incidentType = 36;
+      incidentType = incident.Incs[0].IT;
     } else {
       // Other incidents
       incidentType = incident.IT;

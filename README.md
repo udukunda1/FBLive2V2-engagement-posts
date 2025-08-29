@@ -47,14 +47,15 @@ A Node.js application for tracking live football matches with real-time updates 
 - **Key Data**:
   - `Incs[1]` - First half incidents array
   - `Incs[2]` - Second half incidents array
-  - Incident types:
-    - `IT: 36` - Goal (including goals with assists)
-    - `IT: 37` - Penalty goal
-    - `IT: 38` - Missed penalty
-    - `IT: 39` - Own goal
-    - `IT: 62` - VAR check (no goal)
-    - `IT: 45` - Red card
-    - `IT: 44` - Second yellow = red card
+      - Incident types:
+      - `IT: 36` - Goal (including goals with assists)
+      - `IT: 37` - Penalty goal
+      - `IT: 38` - Missed penalty
+      - `IT: 39` - Own goal
+      - `IT: 47` - Extra time goal
+      - `IT: 62` - VAR check (no goal)
+      - `IT: 45` - Red card
+      - `IT: 44` - Second yellow = red card
 
 ## Live Tracking Features
 
@@ -72,6 +73,7 @@ The live tracking system polls every 20 seconds and provides:
 - **Penalty Goals** (IT: 37) - Goals from penalties
 - **Missed Penalties** (IT: 38) - Penalties that were missed
 - **Own Goals** (IT: 39) - Goals scored against own team
+- **Extra Time Goals** (IT: 47) - Goals scored during extra time periods
 - **VAR Checks** (IT: 62) - Goals disallowed by VAR
 - **Red Cards** (IT: 45) - Direct red cards
 - **Second Yellow = Red** (IT: 44) - Red cards from second yellow
@@ -135,7 +137,7 @@ Kick off: Manchester United 0–0 Liverpool
 - **First Name Handling**: Safely handles cases where first name initials are not available
 
 ### Performance Optimizations
-- **Incident Type Filtering**: Only processes supported incident types (36, 37, 38, 39, 44, 45, 62)
+- **Incident Type Filtering**: Only processes supported incident types (36, 37, 38, 39, 44, 45, 47, 62)
 - **Reduced Console Noise**: Only logs incidents with missing player names, not unsupported types
 - **Early Exit Logic**: Skips processing for unsupported or invalid incidents
 
@@ -232,6 +234,12 @@ Matches are stored with the following fields:
 - Frontend display of match times with smart formatting (Today, Tomorrow, etc.)
 - Visual indicators for match timing (overdue, starting soon, upcoming, future)
 - Automatic sorting of matches by date/time
+- **Added Extra Time Support**: 
+  - Extra time incidents tracking (IT: 47 for extra time goals)
+  - Extra time incidents array handling (`Incs[3]`)
+  - Full-time announcements for both regular (FT) and extra time (AET) matches
+  - Penalty shootout support (AP status with separate penalty scores)
+- **Kickoff Announcement Logic**: Skip kickoff announcement if match has already started (minute > 1)
 
 Solving problem of ending before extratime or penalty if it happens
 --------------------------------------------------------------------
@@ -250,3 +258,28 @@ Future Addition:
 2. Yellow Card(if preffered for some matches) : 
 
 it will be added by adding IT: 43 to supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 47, 62];  then add display message in conditions
+
+
+
+## Extra Time and Penalty Shootout Support
+
+The system now fully supports matches that go to extra time and penalty shootouts:
+
+### Extra Time Handling
+- **Incident Tracking**: Extra time incidents are tracked using `Incs[3]` array
+- **Goal Detection**: Extra time goals (IT: 47) are handled the same as regular goals (IT: 36)
+- **Match Status**: Supports both "FT" (Full Time) and "AET" (After Extra Time) statuses
+- **Minute Detection**: Automatically detects when match goes beyond 90 minutes
+
+### Penalty Shootout Support
+- **Status Detection**: Recognizes "AP" (After Penalties) status
+- **Dual Announcement**: Posts both full-time score and penalty shootout result
+- **Score Display**: Shows format:
+  ```
+  🏁 FT: Team A 1–1 Team B
+  🥅Pen: Team A 4–3 Team B
+  ```
+
+### Late Server Start Protection
+- **Kickoff Logic**: If server starts late and match is already in progress (minute > 1), kickoff announcement is skipped
+- **Prevents Duplicate Posts**: Ensures no late kickoff announcements for matches already underway

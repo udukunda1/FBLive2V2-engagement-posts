@@ -211,8 +211,8 @@ async function processMatch(match) {
 
     // Check if match has started (Eps is not "NS", "Delay", or "Postponed")
     if (matchStatus.Eps && matchStatus.Eps !== "NS" && matchStatus.Eps !== "Delay" && matchStatus.Eps !== "Postponed") {
-      await handleMatchStatus(match, matchStatus);
       await handleMatchIncidents(match, matchStatus, matchIncidents);
+      await handleMatchStatus(match, matchStatus);
     }
   } catch (error) {
     console.error(`Error processing match ${match.eventID}:`, error.message);

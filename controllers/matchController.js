@@ -372,7 +372,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   }
   
   // Define supported incident types
-  const supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 62];
+  const supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 47, 62];
   
   // Get the actual incident type (handle goal with assist case)
   const actualIncidentType = !incident.IT && incident.Incs && incident.Incs[0] ? incident.Incs[0].IT : incident.IT;
@@ -424,7 +424,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   };
 
   // Handle different incident types
-  if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT === 36) {
+  if (!incident.IT && incident.Incs && incident.Incs[0] && (incident.Incs[0].IT === 36 || incident.Incs[0].IT === 47)) {
     // Goal with assist
     const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ ${formatPlayerName(incident.Incs[0])} (${formatMinute(incident)})`;
@@ -436,8 +436,8 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     
     // Post to Facebook
     await postToFacebook(`${scoreMessage}\n\n${goalMessage}\n${assistMessage}`);
-  } else if (incident.IT === 36) {
-    // Goal
+  } else if (incident.IT === 36 || incident.IT === 47) {
+    // Goal (regular or extra time)
     const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ ${formatPlayerName(incident)} (${formatMinute(incident)})`;
     

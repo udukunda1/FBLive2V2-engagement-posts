@@ -277,7 +277,7 @@ async function handleMatchStatus(match, matchStatus) {
   }
 
   // Check full-time announcement
-  if (!match.ftannounced && matchStatus.Eps === "FT") {
+  if (!match.ftannounced && (matchStatus.Eps === "FT" || matchStatus.Eps === "AET")) {
     const message = `🏁 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     console.log(message);
     

@@ -244,12 +244,22 @@ async function handleMatchStatus(match, matchStatus) {
 
   // Check kickoff announcement
   if (!match.kickoffannounced) {
-    const message = `Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`;
-    console.log(message);
+    // Check if match has already started (minute > 1)
+    let currentMinute = 0;
+    if (matchStatus.Eps && typeof matchStatus.Eps === 'string' && matchStatus.Eps.includes("'")) {
+      currentMinute = parseInt(matchStatus.Eps.replace("'", ""));
+    }
     
-    // Post to Facebook
-    await postToFacebook(message);
+    // Only announce kickoff if match hasn't started yet or is at minute 1
+    if (currentMinute <= 1) {
+      const message = `Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`;
+      console.log(message);
+      
+      // Post to Facebook
+      await postToFacebook(message);
+    }
     
+    // Mark kickoff as announced regardless to prevent future announcements
     match.kickoffannounced = true;
     await match.save();
   }

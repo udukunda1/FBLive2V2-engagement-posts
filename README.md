@@ -232,3 +232,12 @@ Matches are stored with the following fields:
 - Frontend display of match times with smart formatting (Today, Tomorrow, etc.)
 - Visual indicators for match timing (overdue, starting soon, upcoming, future)
 - Automatic sorting of matches by date/time
+
+Solving problem of ending before extratime or penalty if it happens
+--------------------------------------------------------------------
+
+if the API shows "FT" before "AET" or before "AP" or Between "AET" and "AP".
+
+i will remove match.status = "ended" after FT and AET announcement.
+:so that it will continue to track the match after FT or AET announced, until i delete it from db or after PENs
+(or when i manually turn to ended, if i add that endpoint)

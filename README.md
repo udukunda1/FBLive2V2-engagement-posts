@@ -241,3 +241,12 @@ if the API shows "FT" before "AET" or before "AP" or Between "AET" and "AP".
 i will remove match.status = "ended" after FT and AET announcement.
 :so that it will continue to track the match after FT or AET announced, until i delete it from db or after PENs
 (or when i manually turn to ended, if i add that endpoint)
+
+
+Future Addition: 
+------------------
+
+1. VAR Removed Red Card
+2. Yellow Card(if preffered for some matches) : 
+
+it will be added by adding IT: 43 to supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 47, 62];  then add display message in conditions

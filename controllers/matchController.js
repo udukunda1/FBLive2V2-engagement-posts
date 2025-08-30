@@ -316,15 +316,15 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
   if (matchStatus.Eps && typeof matchStatus.Eps === 'string' && matchStatus.Eps.includes("'")) {
     const minute = parseInt(matchStatus.Eps.replace("'", ""));
     
-    if (minute >= 1 && minute <= 45) {
+    if ((minute >= 1 && minute <= 45) || matchStatus.Eps === "HT") {
       // First half
       incidentsArray = matchIncidents.Incs[1] || [];
       halfPrefix = "1";
-    } else if (minute >= 46 && minute <= 90) {
+    } else if ((minute >= 46 && minute <= 90) || matchStatus.Eps === "FT") {
       // Second half
       incidentsArray = matchIncidents.Incs[2] || [];
       halfPrefix = "2";
-    } else if (minute > 90) {
+    } else if (minute > 90 || matchStatus.Eps === "AET") {
       // Extra time
       incidentsArray = matchIncidents.Incs[3] || [];
       halfPrefix = "3";

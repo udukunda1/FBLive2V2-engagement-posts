@@ -511,4 +511,15 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // Post to Facebook
     await postToFacebook(`${scoreMessage}\n\n${yellowMessage}\n${cardMessage}`);
   }
+  else if (incident.IT === 43) {
+    // Yellow card
+    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const yellowMessage = `🟨 Yellow Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
+    
+    console.log(scoreMessage);
+    console.log(yellowMessage);
+
+    // Post to Facebook
+    await postToFacebook(`${scoreMessage}\n\n${yellowMessage}`);
+  }
 }

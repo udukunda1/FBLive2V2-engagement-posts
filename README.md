@@ -257,7 +257,7 @@ Future Addition:
 1. VAR Removed Red Card
 2. Yellow Card(if preffered for some matches) : 
 
-it will be added by adding IT: 43 to supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 47, 62];  then add display message in conditions
+it will be added by adding IT: 43 to supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 47, 62];
 
 
 

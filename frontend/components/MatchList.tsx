@@ -13,6 +13,7 @@ interface MatchListProps {
 
 export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpdateTeams }: MatchListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [editData, setEditData] = useState<{ homeTeam: string; awayTeam: string; competition: string }>({
     homeTeam: '',
     awayTeam: '',
@@ -35,6 +36,19 @@ export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpd
 
   const handleCancel = () => {
     setEditingId(null);
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const handleDeleteConfirm = (id: string) => {
+    onRemoveMatch(id);
+    setDeleteConfirmId(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmId(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -123,20 +137,20 @@ export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpd
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {matches.map((match) => (
-        <div key={match._id} className={`border border-gray-200 rounded-lg p-4 ${match.matchDateTime ? getMatchTimeStatus(match.matchDateTime)?.bgColor || 'bg-white' : 'bg-white'}`}>
+        <div key={match._id} className={`border border-gray-200 rounded-lg p-3 sm:p-4 ${match.matchDateTime ? getMatchTimeStatus(match.matchDateTime)?.bgColor || 'bg-white' : 'bg-white'}`}>
           {editingId === match._id ? (
             // Edit mode
             <div className="space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Home Team</label>
                   <input
                     type="text"
                     value={editData.homeTeam}
                     onChange={(e) => setEditData(prev => ({ ...prev, homeTeam: e.target.value }))}
-                    className="input-field"
+                    className="input-field text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -145,30 +159,30 @@ export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpd
                     type="text"
                     value={editData.awayTeam}
                     onChange={(e) => setEditData(prev => ({ ...prev, awayTeam: e.target.value }))}
-                    className="input-field"
+                    className="input-field text-sm sm:text-base"
                   />
                 </div>
-                <div>
+                <div className="sm:col-span-2 lg:col-span-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Competition</label>
                   <input
                     type="text"
                     value={editData.competition}
                     onChange={(e) => setEditData(prev => ({ ...prev, competition: e.target.value }))}
-                    className="input-field"
+                    className="input-field text-sm sm:text-base"
                   />
                 </div>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                 <button
                   onClick={() => handleSave(match._id)}
-                  className="btn-success flex items-center"
+                  className="btn-success flex items-center justify-center text-sm sm:text-base"
                 >
                   <Save className="h-4 w-4 mr-1" />
                   Save
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="btn-secondary flex items-center"
+                  className="btn-secondary flex items-center justify-center text-sm sm:text-base"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Cancel
@@ -177,45 +191,9 @@ export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpd
             </div>
           ) : (
             // View mode
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-3 mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {match.homeTeam} vs {match.awayTeam}
-                  </h3>
-                  {getStatusBadge(match.status)}
-                  {getWatchBadge(match.watch)}
-                </div>
-                
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    <span>Event ID: {match.eventID}</span>
-                  </div>
-                  {match.matchDateTime && (
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span className={`font-medium ${getMatchTimeStatus(match.matchDateTime)?.color || 'text-blue-600'}`}>
-                        {formatMatchDateTime(match.matchDateTime)}
-                      </span>
-                    </div>
-                  )}
-                  {match.competition && (
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-1" />
-                      <span>{match.competition}</span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                  <span>Kickoff: {match.kickoffannounced ? '✓' : '✗'}</span>
-                  <span>HT: {match.htannounced ? '✓' : '✗'}</span>
-                  <span>FT: {match.ftannounced ? '✓' : '✗'}</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-2">
+            <div className="space-y-3 sm:space-y-0">
+              {/* Action buttons at the top */}
+              <div className="flex items-center justify-end gap-1 sm:gap-2">
                 <button
                   onClick={() => onToggleWatch(match._id)}
                   className={`p-2 rounded-lg transition-colors ${
@@ -237,17 +215,93 @@ export default function MatchList({ matches, onToggleWatch, onRemoveMatch, onUpd
                 </button>
                 
                 <button
-                  onClick={() => onRemoveMatch(match._id)}
+                  onClick={() => handleDeleteClick(match._id)}
                   className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
                   title="Remove match"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                      {match.homeTeam} vs {match.awayTeam}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {getStatusBadge(match.status)}
+                      {getWatchBadge(match.watch)}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                    <div className="flex items-center">
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                      <span className="truncate">Event ID: {match.eventID}</span>
+                    </div>
+                    {match.matchDateTime && (
+                      <div className="flex items-center">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                        <span className={`font-medium truncate ${getMatchTimeStatus(match.matchDateTime)?.color || 'text-blue-600'}`}>
+                          {formatMatchDateTime(match.matchDateTime)}
+                        </span>
+                      </div>
+                    )}
+                    {match.competition && (
+                      <div className="flex items-center">
+                        <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                        <span className="truncate">{match.competition}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-2 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-gray-500">
+                    <span>Kickoff: {match.kickoffannounced ? '✓' : '✗'}</span>
+                    <span>HT: {match.htannounced ? '✓' : '✗'}</span>
+                    <span>FT: {match.ftannounced ? '✓' : '✗'}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
       ))}
+      
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center mb-4">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Delete Match</h3>
+              <p className="text-sm text-gray-500">
+                Are you sure you want to delete this match? This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                className="flex-1 btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteConfirm(deleteConfirmId)}
+                className="flex-1 btn-danger"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

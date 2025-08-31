@@ -120,77 +120,88 @@ export default function Home() {
   }, [success, error]);
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">FBLive 2 Dashboard</h1>
-        <p className="text-lg text-gray-600">Manage and track live football matches</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
 
-      {/* Notifications */}
-      {error && (
-        <div className="flex items-center p-4 bg-red-50 border border-red-200 rounded-lg">
-          <XCircle className="h-5 w-5 text-red-500 mr-3" />
-          <span className="text-red-700">{error}</span>
-        </div>
-      )}
-
-      {success && (
-        <div className="flex items-center p-4 bg-green-50 border border-green-200 rounded-lg">
-          <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-          <span className="text-green-700">{success}</span>
-        </div>
-      )}
-
-      {/* Live Tracking Controls */}
-      <LiveTracking
-        isLiveTracking={isLiveTracking}
-        onStart={handleStartLiveTracking}
-        onStop={handleStopLiveTracking}
-        pendingMatchesCount={matches.filter(m => m.status === 'pending' && m.watch).length}
-      />
-
-      {/* Match Search */}
-      <MatchSearch onSearch={handleSearchMatch} />
-
-      {/* Match List */}
-      <div className="card">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Matches</h2>
-          <button
-            onClick={loadMatches}
-            disabled={loading}
-            className="btn-secondary flex items-center"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                Loading...
-              </>
-            ) : (
-              'Refresh'
-            )}
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading matches...</p>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Notifications */}
+        {error && (
+          <div className="flex items-center p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg mb-4 sm:mb-6">
+            <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-2 sm:mr-3 flex-shrink-0" />
+            <span className="text-sm sm:text-base text-red-700">{error}</span>
           </div>
-        ) : matches.length === 0 ? (
-          <div className="text-center py-8">
-            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No matches found. Search for a match to get started.</p>
-          </div>
-        ) : (
-          <MatchList
-            matches={matches}
-            onToggleWatch={handleToggleWatch}
-            onRemoveMatch={handleRemoveMatch}
-            onUpdateTeams={handleUpdateTeams}
-          />
         )}
+
+        {success && (
+          <div className="flex items-center p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg mb-4 sm:mb-6">
+            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0" />
+            <span className="text-sm sm:text-base text-green-700">{success}</span>
+          </div>
+        )}
+
+        {/* Responsive Two Column Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+          {/* Left Column - Controls and Search */}
+          <div className="space-y-4 sm:space-y-6 order-2 xl:order-1">
+            {/* Match Search */}
+            <MatchSearch onSearch={handleSearchMatch} />
+            
+            {/* Live Tracking Controls */}
+            <LiveTracking
+              isLiveTracking={isLiveTracking}
+              onStart={handleStartLiveTracking}
+              onStop={handleStopLiveTracking}
+              pendingMatchesCount={matches.filter(m => m.status === 'pending' && m.watch).length}
+            />
+          </div>
+
+          {/* Right Column - Matches */}
+          <div className="space-y-4 sm:space-y-6 order-1 xl:order-2">
+            <div className="card">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Matches</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Total: {loading ? '...' : matches.length} {matches.length === 1 ? 'match' : 'matches'}
+                  </p>
+                </div>
+                <button
+                  onClick={loadMatches}
+                  disabled={loading}
+                  className="btn-secondary flex items-center justify-center sm:justify-start w-full sm:w-auto"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                      Loading...
+                    </>
+                  ) : (
+                    'Refresh'
+                  )}
+                </button>
+              </div>
+
+              {loading ? (
+                <div className="text-center py-6 sm:py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary-600 mx-auto"></div>
+                  <p className="mt-2 text-sm sm:text-base text-gray-600">Loading matches...</p>
+                </div>
+              ) : matches.length === 0 ? (
+                <div className="text-center py-6 sm:py-8">
+                  <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                  <p className="text-sm sm:text-base text-gray-600">No matches found. Search for a match to get started.</p>
+                </div>
+              ) : (
+                <MatchList
+                  matches={matches}
+                  onToggleWatch={handleToggleWatch}
+                  onRemoveMatch={handleRemoveMatch}
+                  onUpdateTeams={handleUpdateTeams}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

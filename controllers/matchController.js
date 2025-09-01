@@ -316,21 +316,39 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
   let halfPrefix = "";
 
   // Determine which half we're in and get the appropriate incidents array
-  if (matchStatus.Eps && typeof matchStatus.Eps === 'string' && matchStatus.Eps.includes("'")) {
-    const minute = parseInt(matchStatus.Eps.replace("'", ""));
-    
-    if ((minute >= 1 && minute <= 45) || matchStatus.Eps === "HT") {
-      // First half
-      incidentsArray = matchIncidents.Incs[1] || [];
-      halfPrefix = "1";
-    } else if ((minute >= 46 && minute <= 90) || matchStatus.Eps === "FT") {
-      // Second half
-      incidentsArray = matchIncidents.Incs[2] || [];
-      halfPrefix = "2";
-    } else if (minute > 90 || matchStatus.Eps === "AET") {
-      // Extra time
-      incidentsArray = matchIncidents.Incs[3] || [];
-      halfPrefix = "3";
+  if (matchStatus.Eps && typeof matchStatus.Eps === 'string') {
+    if (matchStatus.Eps.includes("'")) {
+      // It's a minute value (e.g., "45'", "90+2'")
+      const minute = parseInt(matchStatus.Eps.replace("'", ""));
+      
+      if (minute >= 1 && minute <= 45) {
+        // First half
+        incidentsArray = matchIncidents.Incs[1] || [];
+        halfPrefix = "1";
+      } else if (minute >= 46 && minute <= 90) {
+        // Second half
+        incidentsArray = matchIncidents.Incs[2] || [];
+        halfPrefix = "2";
+      } else if (minute > 90) {
+        // Extra time
+        incidentsArray = matchIncidents.Incs[3] || [];
+        halfPrefix = "3";
+      }
+    } else {
+      // It's a status value (e.g., "HT", "FT", "AET")
+      if (matchStatus.Eps === "HT") {
+        // Half time
+        incidentsArray = matchIncidents.Incs[1] || [];
+        halfPrefix = "1";
+      } else if (matchStatus.Eps === "FT") {
+        // Full time
+        incidentsArray = matchIncidents.Incs[2] || [];
+        halfPrefix = "2";
+      } else if (matchStatus.Eps === "AET") {
+        // After extra time
+        incidentsArray = matchIncidents.Incs[3] || [];
+        halfPrefix = "3";
+      }
     }
   }
 

@@ -540,7 +540,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(yellowMessage);
 
-    // Post to Facebook
+    // Post to Facebook page.
     await postToFacebook(`${scoreMessage}\n\n${yellowMessage}`);
   }
 }

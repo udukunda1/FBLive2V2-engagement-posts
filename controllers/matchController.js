@@ -246,12 +246,15 @@ async function handleMatchStatus(match, matchStatus) {
   if (!match.kickoffannounced) {
     // Check if match has already started (minute > 1)
     let currentMinute = 0;
+    let isMinuteValue = false;
+    
     if (matchStatus.Eps && typeof matchStatus.Eps === 'string' && matchStatus.Eps.includes("'")) {
       currentMinute = parseInt(matchStatus.Eps.replace("'", ""));
+      isMinuteValue = true;
     }
     
-    // Only announce kickoff if match hasn't started yet or is at minute 1
-    if (currentMinute <= 1) {
+    // Only announce kickoff if Eps is a minute value and match hasn't started yet or is at minute 1
+    if (isMinuteValue && currentMinute <= 1) {
       const message = `Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`;
       console.log(message);
       

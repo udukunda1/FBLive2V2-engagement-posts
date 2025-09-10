@@ -269,7 +269,7 @@ async function handleMatchStatus(match, matchStatus) {
 
   // Check half-time announcement
   if (!match.htannounced && matchStatus.Eps === "HT") {
-    const message = `⏸️ HT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const message = `🚩 HT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     console.log(message);
     
     // Post to Facebook
@@ -281,7 +281,7 @@ async function handleMatchStatus(match, matchStatus) {
 
   // Check full-time announcement
   if (!match.ftannounced && (matchStatus.Eps === "FT" || matchStatus.Eps === "AET")) {
-    const message = `🏁 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const message = `🚩 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     console.log(message);
     
     // Post to Facebook
@@ -294,7 +294,7 @@ async function handleMatchStatus(match, matchStatus) {
 
   // Check after penalties announcement
   if (!match.ftannounced && matchStatus.Eps === "AP") {
-    const ftMessage = `🏁 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const ftMessage = `🚩 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const penMessage = `🥅Pen: ${match.homeTeam} ${matchStatus.Trp1}–${matchStatus.Trp2} ${match.awayTeam}`;
     
     console.log(ftMessage);
@@ -447,8 +447,8 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   // Handle different incident types
   if (!incident.IT && incident.Incs && incident.Incs[0] && (incident.Incs[0].IT === 36 || incident.Incs[0].IT === 47)) {
     // Goal with assist
-    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`;
-    const goalMessage = `⚽ ${formatPlayerName(incident.Incs[0])} (${formatMinute(incident)})`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`;
+    const goalMessage = `⚽ Goal: ${formatPlayerName(incident.Incs[0])} (${formatMinute(incident)})`;
     const assistMessage = `🅰️ ${formatPlayerName(incident.Incs[1])}`;
     
     console.log(scoreMessage);
@@ -456,51 +456,51 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(assistMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n${goalMessage}\n${assistMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}\n${assistMessage}`);
   } else if (incident.IT === 36 || incident.IT === 47) {
     // Goal (regular or extra time)
-    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
-    const goalMessage = `⚽ ${formatPlayerName(incident)} (${formatMinute(incident)})`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const goalMessage = `⚽ Goal: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
     
     console.log(scoreMessage);
     console.log(goalMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n${goalMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}`);
   } else if (incident.IT === 37) {
     // Penalty goal
-    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ ${formatPlayerName(incident)} (Penalty) (${formatMinute(incident)})`;
     
     console.log(scoreMessage);
     console.log(goalMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n${goalMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}`);
   } else if (incident.IT === 38) {
     // Missed penalty
-    const scoreMessage = `⏱️Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const penaltyMessage = `❌ ${formatPlayerName(incident)} (Missed Penalty) (${formatMinute(incident)})`;
     
     console.log(scoreMessage);
     console.log(penaltyMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n${penaltyMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${penaltyMessage}`);
   } else if (incident.IT === 39) {
     // Own goal
-    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ ${formatPlayerName(incident)} (OG) (${formatMinute(incident)})`;
     
     console.log(scoreMessage);
     console.log(goalMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n${goalMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}`);
   } else if (incident.IT === 62) {
     // VAR check - no goal
     const varMessage = `🚨VAR CHECK🚨`;
-    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const decisionMessage = `❌ ${incident.Fn && incident.Ln ? `${formatPlayerName(incident)} (${incident.IR})` : `${incident.IR}` } (${formatMinute(incident)})`;
     
     console.log(varMessage);
@@ -508,20 +508,20 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(decisionMessage);
     
     // Post to Facebook
-    await postToFacebook(`${varMessage}\n${scoreMessage}\n\n${decisionMessage}`);
+    await postToFacebook(`${varMessage}\n${scoreMessage}\n\n.\n${decisionMessage}`);
   } else if (incident.IT === 45) {
     // Red card
-    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const cardMessage = `🟥 Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
     
     console.log(scoreMessage);
     console.log(cardMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n${cardMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${cardMessage}`);
   } else if (incident.IT === 44) {
     // Second yellow = red card
-    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const yellowMessage = `🟨🟨 = 🟥`;
     const cardMessage = `Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
     
@@ -530,17 +530,17 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(cardMessage);
     
     // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n${yellowMessage}\n${cardMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${yellowMessage}\n${cardMessage}`);
   }
   else if (incident.IT === 43) {
     // Yellow card
-    const scoreMessage = `⏱️ Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
+    const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const yellowMessage = `🟨 Yellow Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
     
     console.log(scoreMessage);
     console.log(yellowMessage);
 
     // Post to Facebook page.
-    await postToFacebook(`${scoreMessage}\n\n${yellowMessage}`);
+    await postToFacebook(`${scoreMessage}\n\n.\n${yellowMessage}`);
   }
 }

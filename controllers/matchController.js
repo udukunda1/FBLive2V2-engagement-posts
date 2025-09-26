@@ -1,6 +1,126 @@
 import Match from '../models/Match.js';
 import axios from 'axios';
 
+// Reusable helpers for Facebook interactions and Gemini-generated comments
+async function postToFacebook(message) {
+  const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
+  const page_id = process.env.FACEBOOK_PAGE_ID;
+  if (!access_token || !page_id) {
+    console.log('No access token or page ID found');
+    return null;
+  }
+  try {
+    const data = { message, access_token };
+    const fbResponse = await axios.post(`https://graph.facebook.com/v23.0/${page_id}/feed`, null, { params: data });
+    const postId = fbResponse?.data?.id || null;
+    console.log(message + ' - Posted to FB' + (postId ? ` (id: ${postId})` : ''));
+    return postId;
+  } catch (error) {
+    console.error('Error posting to Facebook:', error.response?.data || error.message);
+    return null;
+  }
+}
+
+async function generateGeminiComment(updateText) {
+  let comment = null;
+
+  // Context-aware fallback generator based on the update text
+  const craftFallbackComment = (text) => {
+    const normalized = (text || '').trim();
+    const lower = normalized.toLowerCase();
+    const has = (s) => lower.includes(s);
+
+    // Try to extract team names from patterns like "TeamA 1–0 TeamB"
+    let home = '';
+    let away = '';
+    try {
+      const m = normalized.match(/([A-Za-z .]+)\s+\d+\s*[–-]\s*\d+\s+([A-Za-z .]+)/);
+      if (m) {
+        home = m[1].trim();
+        away = m[2].trim();
+      }
+    } catch (_) {}
+
+    if (has('var')) return 'VAR drama—fair or harsh? What do you think today?';
+    if (has('red card')) return 'Red card changes everything—was it deserved? Your thoughts?';
+    if (has('yellow card')) return 'Discipline matters—smart fouls or needless cards? Share your take.';
+    if (has('kick off') || has('kickoff')) {
+      if (home && away) return `Game on—${home} vs ${away}! Who takes the win?`;
+      return 'Game on! Who takes the win today—home or away?';
+    }
+    if (has('ht')) return 'Halftime—what adjustments would you make for the comeback?';
+    if (has('aet') || has('ft') || has('pen:') || has('after extra time')) return 'Full-time—player of the match? Drop your pick below!';
+    if (has('goal') || has('live')) {
+      if (home && away) return `Momentum shift—${home} or ${away} now in control?`;
+      return 'What a moment—who grabs momentum now? Thoughts below, fans?';
+    }
+    // Generic engaging fallback (~10 words)
+    return 'Big moment—what do you think? Confidence levels right now?';
+  };
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      const body = {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Write a short, engaging 10 words comment for Facebook fans based on this football update: ${updateText} Make it either a question or a compliment or something.`
+              }
+            ]
+          }
+        ]
+      };
+      const response = await axios.post(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent',
+        body,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          params: { 'key': apiKey }
+        }
+      );
+      const result = response?.data;
+      const candidate = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (candidate) {
+        comment = candidate;
+        console.log('✅ Gemini comment added:', comment);
+      } else {
+        console.log('⚠️ Gemini API returned no candidates');
+      }
+    } else {
+      console.log('Gemini api key undefined:', apiKey);
+    }
+  } catch (error) {
+    console.log('⚠️ Gemini API error, try use fallback comment', error.message);
+  }
+
+  if (!comment) comment = craftFallbackComment(updateText);
+  return comment;
+}
+
+async function likeAndCommentOnFacebook(postId, updateText) {
+  const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
+  if (!postId || !access_token) return;
+  try {
+    // Like the post
+    await axios.post(`https://graph.facebook.com/v23.0/${postId}/likes`, null, { params: { access_token } });
+  } catch (err) {
+    console.log('⚠️ Error liking post:', err.response?.data || err.message);
+  }
+  try {
+    // Generate comment and post it
+    const commentText = await generateGeminiComment(updateText);
+    if (commentText) {
+      await axios.post(`https://graph.facebook.com/v23.0/${postId}/comments`, null, {
+        params: { access_token, message: commentText }
+      });
+    }
+  } catch (err) {
+    console.log('⚠️ Error commenting on post:', err.response?.data || err.message);
+  }
+}
+
 export const getAllMatches = async (req, res) => {
   try {
     // Get all matches and sort by matchDateTime (newest first)
@@ -220,27 +340,6 @@ async function processMatch(match) {
 }
 
 async function handleMatchStatus(match, matchStatus) {
-  // Facebook posting helper function
-  const postToFacebook = async (message) => {
-    const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
-    const page_id = process.env.FACEBOOK_PAGE_ID;
-    
-    if (access_token && page_id) {
-      try {
-        const data = {
-          message: message,
-          access_token: access_token
-        };
-        const fbResponse = await axios.post(`https://graph.facebook.com/v23.0/${page_id}/feed`, null, { params: data });
-        console.log(message + " - Posted to FB");
-      } catch (error) {
-        console.error("Error posting to Facebook:", error.response?.data || error.message);
-      }
-    }
-    else {
-      console.log("No access token or page ID found");
-    }
-  };
 
   // Check kickoff announcement
   if (!match.kickoffannounced) {
@@ -257,9 +356,10 @@ async function handleMatchStatus(match, matchStatus) {
     if (isMinuteValue && currentMinute <= 1) {
       const message = `Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`;
       console.log(message);
-      
-      // Post to Facebook
-      await postToFacebook(message);
+
+      //post to facebook and like and comment on facebook
+      const postId = await postToFacebook(message);
+      await likeAndCommentOnFacebook(postId, message);
     }
     
     // Mark kickoff as announced regardless to prevent future announcements
@@ -272,8 +372,9 @@ async function handleMatchStatus(match, matchStatus) {
     const message = `🚩 HT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     console.log(message);
     
-    // Post to Facebook
-    await postToFacebook(message);
+    //post to facebook and like and comment on facebook
+    const postIdHT = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postIdHT, message);
     
     match.htannounced = true;
     await match.save();
@@ -284,8 +385,9 @@ async function handleMatchStatus(match, matchStatus) {
     const message = `🚩 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     console.log(message);
     
-    // Post to Facebook
-    await postToFacebook(message);
+    //post to facebook and like and comment on facebook
+    const postIdFT = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postIdFT, message);
     
     match.ftannounced = true;
     match.status = "ended";
@@ -300,8 +402,11 @@ async function handleMatchStatus(match, matchStatus) {
     console.log(ftMessage);
     console.log(penMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${ftMessage}\n\n${penMessage}`);
+    const combinedMessage = `${ftMessage}\n\n${penMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postIdAP = await postToFacebook(combinedMessage);
+    await likeAndCommentOnFacebook(postIdAP, combinedMessage);
     
     match.ftannounced = true;
     match.status = "ended";
@@ -422,27 +527,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     return player.Fn && player.Fn[0] ? `${player.Fn[0]}. ${playerName}` : playerName;
   };
 
-  // Facebook posting helper function
-  const postToFacebook = async (message) => {
-    const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
-    const page_id = process.env.FACEBOOK_PAGE_ID;
-    
-    if (access_token && page_id) {
-      try {
-        const data = {
-          message: message,
-          access_token: access_token
-        };
-        const fbResponse = await axios.post(`https://graph.facebook.com/v23.0/${page_id}/feed`, null, { params: data });
-        console.log(message + " - Posted to FB");
-      } catch (error) {
-        console.error("Error posting to Facebook:", error.response?.data || error.message);
-      }
-    }
-    else {
-      console.log("No access token or page ID found");
-    }
-  };
+  // Posting handled by shared helper at top of file
 
   // Handle different incident types
   if (!incident.IT && incident.Incs && incident.Incs[0] && (incident.Incs[0].IT === 36 || incident.Incs[0].IT === 47)) {
@@ -455,8 +540,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(goalMessage);
     console.log(assistMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}\n${assistMessage}`);
+    const message = `${scoreMessage}\n\n.\n${goalMessage}\n${assistMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   } else if (incident.IT === 36 || incident.IT === 47) {
     // Goal (regular or extra time)
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -465,8 +553,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(goalMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}`);
+    const message = `${scoreMessage}\n\n.\n${goalMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   } else if (incident.IT === 37) {
     // Penalty goal
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -475,8 +566,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(goalMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}`);
+    const message = `${scoreMessage}\n\n.\n${goalMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   } else if (incident.IT === 38) {
     // Missed penalty
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -485,8 +579,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(penaltyMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n.\n${penaltyMessage}`);
+    const message = `${scoreMessage}\n\n.\n${penaltyMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   } else if (incident.IT === 39) {
     // Own goal
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -495,8 +592,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(goalMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n.\n${goalMessage}`);
+    const message = `${scoreMessage}\n\n.\n${goalMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   } else if (incident.IT === 62) {
     // VAR check - no goal
     const varMessage = `🚨VAR CHECK🚨`;
@@ -507,8 +607,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(decisionMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${varMessage}\n${scoreMessage}\n\n.\n${decisionMessage}`);
+    const message = `${varMessage}\n${scoreMessage}\n\n.\n${decisionMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   } else if (incident.IT === 45) {
     // Red card
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
@@ -517,8 +620,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(cardMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n.\n${cardMessage}`);
+    const message = `${scoreMessage}\n\n.\n${cardMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   } else if (incident.IT === 44) {
     // Second yellow = red card
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
@@ -529,8 +635,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(yellowMessage);
     console.log(cardMessage);
     
-    // Post to Facebook
-    await postToFacebook(`${scoreMessage}\n\n.\n${yellowMessage}\n${cardMessage}`);
+    const message = `${scoreMessage}\n\n.\n${yellowMessage}\n${cardMessage}`;
+
+    //post to facebook and like and comment on facebook
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   }
   else if (incident.IT === 43) {
     // Yellow card
@@ -540,7 +649,9 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     console.log(scoreMessage);
     console.log(yellowMessage);
 
-    // Post to Facebook page.
-    await postToFacebook(`${scoreMessage}\n\n.\n${yellowMessage}`);
+    //post to facebook and like and comment on facebook
+    const message = `${scoreMessage}\n\n.\n${yellowMessage}`;
+    const postId = await postToFacebook(message);
+    await likeAndCommentOnFacebook(postId, message);
   }
 }

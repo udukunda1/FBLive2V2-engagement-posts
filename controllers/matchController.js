@@ -21,7 +21,7 @@ async function postToFacebook(message) {
   }
 }
 
-async function generateGeminiComment(updateText) {
+async function generateGeminiComment(updateText, competition) {
   let comment = null;
 
   // Context-aware fallback generator based on the update text
@@ -66,7 +66,7 @@ async function generateGeminiComment(updateText) {
           {
             parts: [
               {
-                text: `Write a short, engaging 10 words comment for Facebook fans based on this football update: "${updateText}" ,Make it either a question or a compliment.(one of them)`
+                text: `Competition: ${competition || 'Unknown'}\nWrite a short, engaging 10 words comment for Facebook fans based on this football update: "${updateText}". Make it either a question or a compliment (choose one).`
               }
             ]
           }
@@ -99,7 +99,7 @@ async function generateGeminiComment(updateText) {
   return comment;
 }
 
-async function likeAndCommentOnFacebook(postId, updateText) {
+async function likeAndCommentOnFacebook(postId, updateText, competition) {
   const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
   if (!postId || !access_token) return;
   try {
@@ -110,7 +110,7 @@ async function likeAndCommentOnFacebook(postId, updateText) {
   }
   try {
     // Generate comment and post it
-    const commentText = await generateGeminiComment(updateText);
+    const commentText = await generateGeminiComment(updateText, competition);
     if (commentText) {
       await axios.post(`https://graph.facebook.com/v23.0/${postId}/comments`, null, {
         params: { access_token, message: commentText }
@@ -359,7 +359,7 @@ async function handleMatchStatus(match, matchStatus) {
 
       //post to facebook and like and comment on facebook
       const postId = await postToFacebook(message);
-      await likeAndCommentOnFacebook(postId, message);
+      await likeAndCommentOnFacebook(postId, message, match.competition);
     }
     
     // Mark kickoff as announced regardless to prevent future announcements
@@ -374,7 +374,7 @@ async function handleMatchStatus(match, matchStatus) {
     
     //post to facebook and like and comment on facebook
     const postIdHT = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postIdHT, message);
+    await likeAndCommentOnFacebook(postIdHT, message, match.competition);
     
     match.htannounced = true;
     await match.save();
@@ -387,7 +387,7 @@ async function handleMatchStatus(match, matchStatus) {
     
     //post to facebook and like and comment on facebook
     const postIdFT = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postIdFT, message);
+    await likeAndCommentOnFacebook(postIdFT, message, match.competition);
     
     match.ftannounced = true;
     match.status = "ended";
@@ -406,7 +406,7 @@ async function handleMatchStatus(match, matchStatus) {
 
     //post to facebook and like and comment on facebook
     const postIdAP = await postToFacebook(combinedMessage);
-    await likeAndCommentOnFacebook(postIdAP, combinedMessage);
+    await likeAndCommentOnFacebook(postIdAP, combinedMessage, match.competition);
     
     match.ftannounced = true;
     match.status = "ended";
@@ -544,7 +544,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
 
     //post to facebook and like and comment on facebook
     const postId = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postId, message);
+    await likeAndCommentOnFacebook(postId, message, match.competition);
   } else if (incident.IT === 36 || incident.IT === 47) {
     // Goal (regular or extra time)
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -557,7 +557,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
 
     //post to facebook and like and comment on facebook
     const postId = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postId, message);
+    await likeAndCommentOnFacebook(postId, message, match.competition);
   } else if (incident.IT === 37) {
     // Penalty goal
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -570,7 +570,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
 
     //post to facebook and like and comment on facebook
     const postId = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postId, message);
+    await likeAndCommentOnFacebook(postId, message, match.competition);
   } else if (incident.IT === 38) {
     // Missed penalty
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -583,7 +583,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
 
     //post to facebook and like and comment on facebook
     const postId = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postId, message);
+    await likeAndCommentOnFacebook(postId, message, match.competition);
   } else if (incident.IT === 39) {
     // Own goal
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
@@ -596,7 +596,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
 
     //post to facebook and like and comment on facebook
     const postId = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postId, message);
+    await likeAndCommentOnFacebook(postId, message, match.competition);
   } else if (incident.IT === 62) {
     // VAR check - no goal
     const varMessage = `🚨VAR CHECK🚨`;
@@ -611,7 +611,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
 
     //post to facebook and like and comment on facebook
     const postId = await postToFacebook(message);
-    await likeAndCommentOnFacebook(postId, message);
+    await likeAndCommentOnFacebook(postId, message, match.competition);
   } else if (incident.IT === 45) {
     // Red card
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;

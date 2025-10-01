@@ -66,7 +66,7 @@ async function generateGeminiComment(updateText, competition) {
           {
             parts: [
               {
-                text: `Competition: ${competition || 'Unknown'}\nWrite a short, engaging 10 words comment for Facebook fans based on this football update: "${updateText}". Make it either a question or a compliment (choose one).`
+                text: `Competition: ${competition || 'Unknown'}\nWrite a short, engaging 10 words comment for Facebook fans based on this football update: "${updateText}". Make it either a question or a compliment (choose one). (reply with the comment only)`
               }
             ]
           }

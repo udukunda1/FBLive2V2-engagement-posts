@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import matchRoutes from './routes/matchRoutes.js';
+import teamRoutes from './routes/teamRoutes.js';
+import { initializeScheduler, runDailyTask } from './services/scheduler.js';
+import { scheduleAllPendingMatches } from './services/matchScheduler.js';
 
 dotenv.config();
 
@@ -14,11 +17,26 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fblive2')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fblive2v2')
+  .then(async () => {
+    console.log('✅ Connected to MongoDB');
+
+    // Run daily task on startup (server resilience)
+    console.log('\n🔄 Running daily task on startup...');
+    await runDailyTask();
+
+    // Re-schedule pending matches (server resilience)
+    console.log('\n📅 Re-scheduling pending matches...');
+    await scheduleAllPendingMatches();
+
+    // Initialize daily scheduler
+    initializeScheduler();
+    console.log('\n✅ V2 Automation Ready!\n');
+  })
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Routes
+app.use('/api', teamRoutes);
 app.use('/api', matchRoutes);
 
 // Health check endpoint
@@ -33,5 +51,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`FBLive 2 API server running on port ${PORT}`);
+  console.log(`\n🚀 Server running on port ${PORT}`);
+  console.log(`📍 Health check: http://localhost:${PORT}/health`);
+  console.log(`📍 Teams API: http://localhost:${PORT}/api/teams`);
+  console.log(`📍 Matches API: http://localhost:${PORT}/api/matches\n`);
 });

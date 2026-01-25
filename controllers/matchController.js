@@ -39,7 +39,7 @@ async function generateGeminiComment(updateText, competition) {
         home = m[1].trim();
         away = m[2].trim();
       }
-    } catch (_) {}
+    } catch (_) { }
 
     if (has('var')) return 'VAR drama—fair or harsh? What do you think today?';
     if (has('red card')) return 'Red card changes everything—was it deserved? Your thoughts?';
@@ -131,192 +131,8 @@ export const getAllMatches = async (req, res) => {
   }
 };
 
-export const removeMatch = async (req, res) => {
-  try {
-    const result = await Match.findByIdAndDelete(req.params.id);
-    if (!result) {
-      return res.status(404).json({ error: 'Match not found' });
-    }
-    res.json({ message: 'Match deleted' });
-  } catch (error) {
-    res.status(500).json({ error: 'Error deleting match', details: error.message });
-  }
-};
-
-export const toggleWatch = async (req, res) => {
-  try {
-    const match = await Match.findById(req.params.id);
-    if (!match) {
-      return res.status(404).json({ error: 'Match not found' });
-    }
-    match.watch = !match.watch;
-    await match.save();
-    res.json(match);
-  } catch (error) {
-    res.status(500).json({ error: 'Error toggling watch', details: error.message });
-  }
-};
-
-export const updateTeamNames = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { homeTeam, awayTeam, competition } = req.body;
-    
-    const match = await Match.findById(id);
-    if (!match) {
-      return res.status(404).json({ error: 'Match not found' });
-    }
-    
-    if (typeof homeTeam === 'string' && homeTeam.trim()) {
-      match.homeTeam = homeTeam.trim();
-    }
-    if (typeof awayTeam === 'string' && awayTeam.trim()) {
-      match.awayTeam = awayTeam.trim();
-    }
-    if (typeof competition === 'string') {
-      match.competition = competition.trim();
-    }
-    await match.save();
-    
-    res.json(match);
-  } catch (error) {
-    res.status(500).json({ error: 'Error updating team names', details: error.message });
-  }
-};
-
-export const searchAndSaveMatch = async (req, res) => {
-  const { matchId } = req.body;
-  
-  if (!matchId) {
-    return res.status(400).json({ error: 'matchId is required' });
-  }
-
-  try {
-    // Check if match already exists
-    let match = await Match.findOne({ eventID: matchId });
-    if (match) {
-      return res.json(match);
-    }
-
-    // Fetch match data from Livescore API
-    const response = await axios.get(`https://prod-cdn-public-api.livescore.com/v1/api/app/scoreboard/soccer/${matchId}?locale=en`);
-    
-    const matchData = response.data;
-    
-    if (!matchData || !matchData.T1 || !matchData.T2) {
-      return res.status(404).json({ error: 'Match not found or invalid data' });
-    }
-
-    // Parse match date and time from Esd (YYYYMMDDHHMMSS format)
-    let matchDateTime = null;
-    if (matchData.Esd) {
-      try {
-        // Convert to string first, then parse the date string (YYYYMMDDHHMMSS)
-        const esdString = matchData.Esd.toString();
-        const year = parseInt(esdString.substring(0, 4));
-        const month = parseInt(esdString.substring(4, 6)) - 1; // Month is 0-indexed
-        const day = parseInt(esdString.substring(6, 8));
-        const hour = parseInt(esdString.substring(8, 10));
-        const minute = parseInt(esdString.substring(10, 12));
-        
-        // Create Date object in local time (already adjusted by 2 hours)
-        matchDateTime = new Date(year, month, day, hour + 2, minute);
-      } catch (error) {
-        console.error('Error parsing match date/time:', error);
-        matchDateTime = null;
-      }
-    }
-
-    // Create new match with data from Livescore API
-    match = new Match({
-      eventID: matchId,
-      homeTeam: matchData.T1[0].Nm,
-      awayTeam: matchData.T2[0].Nm,
-      competition: matchData.Stg?.Snm || '',
-      matchDateTime: matchDateTime, // Store the parsed date/time
-      status: 'pending',
-      watch: false,
-      kickoffannounced: false,
-      htannounced: false,
-      ftannounced: false
-    });
-
-    await match.save();
-    res.json(match);
-  } catch (error) {
-    console.error('Error searching or saving match:', error.message);
-    res.status(500).json({ 
-      error: 'Error searching or saving match', 
-      details: error.message 
-    });
-  }
-};
-
-export const startLiveMatches = async (req, res) => {
-  try {
-    // Find matches with status="pending" and watch=true
-    const pendingMatches = await Match.find({ status: 'pending', watch: true });
-    
-    if (pendingMatches.length === 0) {
-      return res.json({ message: 'No pending matches to watch' });
-    }
-
-    console.log(`Starting live tracking for ${pendingMatches.length} matches`);
-
-    // Start polling every 20 seconds
-    const pollInterval = setInterval(async () => {
-      try {
-        // Get current valid matches (status="pending" and watch=true)
-        const currentMatches = await Match.find({ status: 'pending', watch: true });
-        
-        if (currentMatches.length === 0) {
-          console.log('No more matches to track, stopping polling');
-          clearInterval(pollInterval);
-          return;
-        }
-
-        console.log(`Polling ${currentMatches.length} matches...`);
-
-        // Process each match
-        for (const match of currentMatches) {
-          await processMatch(match);
-        }
-      } catch (error) {
-        console.error('Error in polling cycle:', error);
-      }
-    }, 30000); // 30 seconds
-
-    // Store the interval ID globally or in a way that can be accessed later if needed
-    global.liveMatchesInterval = pollInterval;
-
-    res.json({ 
-      message: `Started live tracking for ${pendingMatches.length} matches`,
-      matches: pendingMatches.map(m => ({ eventID: m.eventID, homeTeam: m.homeTeam, awayTeam: m.awayTeam }))
-    });
-
-  } catch (error) {
-    console.error('Error starting live matches:', error);
-    res.status(500).json({ error: 'Error starting live matches', details: error.message });
-  }
-};
-
-export const stopLiveMatches = async (req, res) => {
-  try {
-    if (global.liveMatchesInterval) {
-      clearInterval(global.liveMatchesInterval);
-      global.liveMatchesInterval = null;
-      console.log('Live matches polling stopped');
-      res.json({ message: 'Live matches polling stopped' });
-    } else {
-      res.json({ message: 'No active live matches polling to stop' });
-    }
-  } catch (error) {
-    console.error('Error stopping live matches:', error);
-    res.status(500).json({ error: 'Error stopping live matches', details: error.message });
-  }
-};
-
-async function processMatch(match) {
+// Export processMatch for use by match scheduler
+export async function processMatch(match) {
   try {
     // Send two requests: one for match status and one for incidents
     console.log(`Processing match ${match.eventID}`);
@@ -346,12 +162,12 @@ async function handleMatchStatus(match, matchStatus) {
     // Check if match has already started (minute > 1)
     let currentMinute = 0;
     let isMinuteValue = false;
-    
+
     if (matchStatus.Eps && typeof matchStatus.Eps === 'string' && matchStatus.Eps.includes("'")) {
       currentMinute = parseInt(matchStatus.Eps.replace("'", ""));
       isMinuteValue = true;
     }
-    
+
     // Only announce kickoff if Eps is a minute value and match hasn't started yet or is at minute 1
     if (isMinuteValue && currentMinute <= 1) {
       const message = `Kick off: ${match.homeTeam} 0–0 ${match.awayTeam}`;
@@ -361,7 +177,7 @@ async function handleMatchStatus(match, matchStatus) {
       const postId = await postToFacebook(message);
       await likeAndCommentOnFacebook(postId, message, match.competition);
     }
-    
+
     // Mark kickoff as announced regardless to prevent future announcements
     match.kickoffannounced = true;
     await match.save();
@@ -371,11 +187,11 @@ async function handleMatchStatus(match, matchStatus) {
   if (!match.htannounced && matchStatus.Eps === "HT") {
     const message = `🚩 HT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     console.log(message);
-    
+
     //post to facebook and like and comment on facebook
     const postIdHT = await postToFacebook(message);
     await likeAndCommentOnFacebook(postIdHT, message, match.competition);
-    
+
     match.htannounced = true;
     await match.save();
   }
@@ -384,11 +200,11 @@ async function handleMatchStatus(match, matchStatus) {
   if (!match.ftannounced && (matchStatus.Eps === "FT" || matchStatus.Eps === "AET")) {
     const message = `🚩 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     console.log(message);
-    
+
     //post to facebook and like and comment on facebook
     const postIdFT = await postToFacebook(message);
     await likeAndCommentOnFacebook(postIdFT, message, match.competition);
-    
+
     match.ftannounced = true;
     match.status = "ended";
     await match.save();
@@ -398,16 +214,16 @@ async function handleMatchStatus(match, matchStatus) {
   if (!match.ftannounced && matchStatus.Eps === "AP") {
     const ftMessage = `🚩 FT: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const penMessage = `🥅Pen: ${match.homeTeam} ${matchStatus.Trp1}–${matchStatus.Trp2} ${match.awayTeam}`;
-    
+
     console.log(ftMessage);
     console.log(penMessage);
-    
+
     const combinedMessage = `${ftMessage}\n\n${penMessage}`;
 
     //post to facebook and like and comment on facebook
     const postIdAP = await postToFacebook(combinedMessage);
     await likeAndCommentOnFacebook(postIdAP, combinedMessage, match.competition);
-    
+
     match.ftannounced = true;
     match.status = "ended";
     await match.save();
@@ -425,7 +241,7 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
     if (matchStatus.Eps.includes("'")) {
       // It's a minute value (e.g., "45'", "90+2'")
       const minute = parseInt(matchStatus.Eps.replace("'", ""));
-      
+
       if (minute >= 1 && minute <= 45) {
         // First half
         incidentsArray = matchIncidents.Incs[1] || [];
@@ -462,7 +278,7 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
   // Process each incident
   for (let i = 0; i < incidentsArray.length; i++) {
     const incident = incidentsArray[i];
-    
+
     // Determine incident type (IT) for uniqueness
     let incidentType;
     if (!incident.IT && incident.Incs && incident.Incs[0] && incident.Incs[0].IT) {
@@ -472,7 +288,7 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
       // Other incidents
       incidentType = incident.IT;
     }
-    
+
     const incidentId = `${halfPrefix}${i}_${incidentType}`;
 
     // Skip if incident already evaluated
@@ -487,7 +303,7 @@ async function handleMatchIncidents(match, matchStatus, matchIncidents) {
 async function evaluateIncident(match, incident, matchStatus, incidentId) {
   // Check if incident has last name (Ln) or player name (Pn) field
   let hasLastName = false;
-  
+
   // For incidents with nested structure (goals with assists)
   if (!incident.IT && incident.Incs && incident.Incs[0] && (incident.Incs[0].Ln || incident.Incs[0].Pn)) {
     hasLastName = true;
@@ -496,13 +312,13 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
   else if (incident.Ln || incident.Pn) {
     hasLastName = true;
   }
-  
+
   // Define supported incident types
   const supportedIncidentTypes = [36, 37, 38, 39, 44, 45, 47, 62];
-  
+
   // Get the actual incident type (handle goal with assist case)
   const actualIncidentType = !incident.IT && incident.Incs && incident.Incs[0] ? incident.Incs[0].IT : incident.IT;
-  
+
   // Skip incident if it's not a supported type or if no last name found (except VAR checks)
   if (!supportedIncidentTypes.includes(actualIncidentType) || (!hasLastName && actualIncidentType !== 62)) {
     // Only log when no last name found, skip logging for unsupported types
@@ -535,11 +351,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Incs[0].Sc[0]}–${incident.Incs[0].Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ Goal: ${formatPlayerName(incident.Incs[0])} (${formatMinute(incident)})`;
     const assistMessage = `🅰️ ${formatPlayerName(incident.Incs[1])}`;
-    
+
     console.log(scoreMessage);
     console.log(goalMessage);
     console.log(assistMessage);
-    
+
     const message = `${scoreMessage}\n\n.\n${goalMessage}\n${assistMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -549,10 +365,10 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // Goal (regular or extra time)
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ Goal: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
-    
+
     console.log(scoreMessage);
     console.log(goalMessage);
-    
+
     const message = `${scoreMessage}\n\n.\n${goalMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -562,10 +378,10 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // Penalty goal
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ ${formatPlayerName(incident)} (Penalty) (${formatMinute(incident)})`;
-    
+
     console.log(scoreMessage);
     console.log(goalMessage);
-    
+
     const message = `${scoreMessage}\n\n.\n${goalMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -575,10 +391,10 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // Missed penalty
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const penaltyMessage = `❌ ${formatPlayerName(incident)} (Missed Penalty) (${formatMinute(incident)})`;
-    
+
     console.log(scoreMessage);
     console.log(penaltyMessage);
-    
+
     const message = `${scoreMessage}\n\n.\n${penaltyMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -588,10 +404,10 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // Own goal
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
     const goalMessage = `⚽ ${formatPlayerName(incident)} (OG) (${formatMinute(incident)})`;
-    
+
     console.log(scoreMessage);
     console.log(goalMessage);
-    
+
     const message = `${scoreMessage}\n\n.\n${goalMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -601,12 +417,12 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // VAR check - no goal
     const varMessage = `🚨VAR CHECK🚨`;
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${incident.Sc[0]}–${incident.Sc[1]} ${match.awayTeam}`;
-    const decisionMessage = `❌ ${incident.Fn && incident.Ln ? `${formatPlayerName(incident)} (${incident.IR})` : `${incident.IR}` } (${formatMinute(incident)})`;
-    
+    const decisionMessage = `❌ ${incident.Fn && incident.Ln ? `${formatPlayerName(incident)} (${incident.IR})` : `${incident.IR}`} (${formatMinute(incident)})`;
+
     console.log(varMessage);
     console.log(scoreMessage);
     console.log(decisionMessage);
-    
+
     const message = `${varMessage}\n${scoreMessage}\n\n.\n${decisionMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -616,10 +432,10 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // Red card
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const cardMessage = `🟥 Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
-    
+
     console.log(scoreMessage);
     console.log(cardMessage);
-    
+
     const message = `${scoreMessage}\n\n.\n${cardMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -630,11 +446,11 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const yellowMessage = `🟨🟨 = 🟥`;
     const cardMessage = `Red Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
-    
+
     console.log(scoreMessage);
     console.log(yellowMessage);
     console.log(cardMessage);
-    
+
     const message = `${scoreMessage}\n\n.\n${yellowMessage}\n${cardMessage}`;
 
     //post to facebook and like and comment on facebook
@@ -645,7 +461,7 @@ async function evaluateIncident(match, incident, matchStatus, incidentId) {
     // Yellow card
     const scoreMessage = `🚩 Live: ${match.homeTeam} ${matchStatus.Tr1}–${matchStatus.Tr2} ${match.awayTeam}`;
     const yellowMessage = `🟨 Yellow Card: ${formatPlayerName(incident)} (${formatMinute(incident)})`;
-    
+
     console.log(scoreMessage);
     console.log(yellowMessage);
 

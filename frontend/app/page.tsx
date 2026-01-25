@@ -1,206 +1,305 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Match } from '../types/match';
-import { matchApi } from '../lib/api';
-import MatchSearch from '../components/MatchSearch';
-import MatchList from '../components/MatchList';
-import LiveTracking from '../components/LiveTracking';
-import { AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+
+interface Team {
+  _id: string;
+  name: string;
+  nickname: string;
+  livescoreId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Match {
+  _id: string;
+  eventID: string;
+  homeTeam: string;
+  awayTeam: string;
+  matchDateTime: string;
+  competition: string;
+  status: string;
+  watch: boolean;
+  kickoffannounced: boolean;
+  htannounced: boolean;
+  ftannounced: boolean;
+}
 
 export default function Home() {
+  const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [isLiveTracking, setIsLiveTracking] = useState(false);
+  const [activeTab, setActiveTab] = useState<'teams' | 'matches'>('teams');
+  const [isAddingTeam, setIsAddingTeam] = useState(false);
+  const [newTeam, setNewTeam] = useState({ name: '', nickname: '', livescoreId: '' });
+  const [loading, setLoading] = useState(false);
 
-  // Load matches on component mount
   useEffect(() => {
-    loadMatches();
+    fetchTeams();
+    fetchMatches();
+    const interval = setInterval(fetchMatches, 30000); // Refresh matches every 30s
+    return () => clearInterval(interval);
   }, []);
 
-  const loadMatches = async () => {
+  const fetchTeams = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const data = await matchApi.getAllMatches();
+      const res = await fetch('/api/teams');
+      const data = await res.json();
+      setTeams(data);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  };
+
+  const fetchMatches = async () => {
+    try {
+      const res = await fetch('/api/matches');
+      const data = await res.json();
       setMatches(data);
-    } catch (err) {
-      setError('Failed to load matches');
-      console.error('Error loading matches:', err);
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+    }
+  };
+
+  const addTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTeam.name.trim()) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/teams', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTeam),
+      });
+
+      if (res.ok) {
+        setNewTeam({ name: '', nickname: '', livescoreId: '' });
+        setIsAddingTeam(false);
+        fetchTeams();
+      }
+    } catch (error) {
+      console.error('Error adding team:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearchMatch = async (matchId: string) => {
+  const deleteTeam = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this team?')) return;
+
     try {
-      setError(null);
-      setSuccess(null);
-      const newMatch = await matchApi.searchAndSaveMatch(matchId);
-      
-      // Check if match already exists in the list
-      const exists = matches.find(m => m._id === newMatch._id);
-      if (!exists) {
-        setMatches(prev => [...prev, newMatch]);
-        setSuccess(`Match "${newMatch.homeTeam} vs ${newMatch.awayTeam}" added successfully!`);
-      } else {
-        setSuccess('Match already exists in the list');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to search match');
+      await fetch(`/api/teams/${id}`, { method: 'DELETE' });
+      fetchTeams();
+    } catch (error) {
+      console.error('Error deleting team:', error);
     }
   };
 
-  const handleToggleWatch = async (id: string) => {
-    try {
-      setError(null);
-      const updatedMatch = await matchApi.toggleWatch(id);
-      setMatches(prev => prev.map(m => m._id === id ? updatedMatch : m));
-      setSuccess(`Watch status updated for ${updatedMatch.homeTeam} vs ${updatedMatch.awayTeam}`);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to toggle watch status');
-    }
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,  // 24-hour format
+    });
   };
-
-  const handleRemoveMatch = async (id: string) => {
-    try {
-      setError(null);
-      await matchApi.removeMatch(id);
-      setMatches(prev => prev.filter(m => m._id !== id));
-      setSuccess('Match removed successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to remove match');
-    }
-  };
-
-  const handleUpdateTeams = async (id: string, data: { homeTeam?: string; awayTeam?: string; competition?: string }) => {
-    try {
-      setError(null);
-      const updatedMatch = await matchApi.updateTeamNames(id, data);
-      setMatches(prev => prev.map(m => m._id === id ? updatedMatch : m));
-      setSuccess('Team names updated successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update team names');
-    }
-  };
-
-  const handleStartLiveTracking = async () => {
-    try {
-      setError(null);
-      const response = await matchApi.startLiveMatches();
-      setIsLiveTracking(true);
-      setSuccess(response.message);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to start live tracking');
-    }
-  };
-
-  const handleStopLiveTracking = async () => {
-    try {
-      setError(null);
-      const response = await matchApi.stopLiveMatches();
-      setIsLiveTracking(false);
-      setSuccess(response.message);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to stop live tracking');
-    }
-  };
-
-  // Clear success/error messages after 5 seconds
-  useEffect(() => {
-    if (success || error) {
-      const timer = setTimeout(() => {
-        setSuccess(null);
-        setError(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, error]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-white mb-2">
+            ⚽ FBLive2 <span className="text-purple-400">V2</span>
+          </h1>
+          <p className="text-slate-300">Automated Football Match Tracking System</p>
+        </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Notifications */}
-        {error && (
-          <div className="flex items-center p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg mb-4 sm:mb-6">
-            <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-2 sm:mr-3 flex-shrink-0" />
-            <span className="text-sm sm:text-base text-red-700">{error}</span>
-          </div>
-        )}
+        {/* Tabs */}
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setActiveTab('teams')}
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${activeTab === 'teams'
+              ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/50'
+              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+          >
+            🎯 Teams ({teams.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('matches')}
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${activeTab === 'matches'
+              ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/50'
+              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+          >
+            📅 Matches ({matches.length})
+          </button>
+        </div>
 
-        {success && (
-          <div className="flex items-center p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg mb-4 sm:mb-6">
-            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0" />
-            <span className="text-sm sm:text-base text-green-700">{success}</span>
-          </div>
-        )}
+        {/* Teams Tab */}
+        {activeTab === 'teams' && (
+          <div className="space-y-4">
+            {/* Add Team Button */}
+            {!isAddingTeam && (
+              <button
+                onClick={() => setIsAddingTeam(true)}
+                className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-green-500/50"
+              >
+                ➕ Add New Team
+              </button>
+            )}
 
-        {/* Responsive Two Column Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-          {/* Left Column - Controls and Search */}
-          <div className="space-y-4 sm:space-y-6 order-2 xl:order-1">
-            {/* Match Search */}
-            <MatchSearch onSearch={handleSearchMatch} />
-            
-            {/* Live Tracking Controls */}
-            <LiveTracking
-              isLiveTracking={isLiveTracking}
-              onStart={handleStartLiveTracking}
-              onStop={handleStopLiveTracking}
-              pendingMatchesCount={matches.filter(m => m.status === 'pending' && m.watch).length}
-            />
-          </div>
-
-          {/* Right Column - Matches */}
-          <div className="space-y-4 sm:space-y-6 order-1 xl:order-2">
-            <div className="card">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Matches</h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Total: {loading ? '...' : matches.length} {matches.length === 1 ? 'match' : 'matches'}
-                  </p>
+            {/* Add Team Form */}
+            {isAddingTeam && (
+              <form onSubmit={addTeam} className="bg-slate-800 rounded-lg p-6 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-4">Add New Team</h3>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Team Name (e.g., Manchester United)"
+                    value={newTeam.name}
+                    onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Nickname (e.g., Man Utd)"
+                    value={newTeam.nickname}
+                    onChange={(e) => setNewTeam({ ...newTeam, nickname: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Livescore ID (optional)"
+                    value={newTeam.livescoreId}
+                    onChange={(e) => setNewTeam({ ...newTeam, livescoreId: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all disabled:opacity-50"
+                    >
+                      {loading ? 'Adding...' : 'Add Team'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingTeam(false);
+                        setNewTeam({ name: '', nickname: '', livescoreId: '' });
+                      }}
+                      className="flex-1 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-600 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={loadMatches}
-                  disabled={loading}
-                  className="btn-secondary flex items-center justify-center sm:justify-start w-full sm:w-auto"
-                >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                      Loading...
-                    </>
-                  ) : (
-                    'Refresh'
-                  )}
-                </button>
-              </div>
+              </form>
+            )}
 
-              {loading ? (
-                <div className="text-center py-6 sm:py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary-600 mx-auto"></div>
-                  <p className="mt-2 text-sm sm:text-base text-gray-600">Loading matches...</p>
-                </div>
-              ) : matches.length === 0 ? (
-                <div className="text-center py-6 sm:py-8">
-                  <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
-                  <p className="text-sm sm:text-base text-gray-600">No matches found. Search for a match to get started.</p>
+            {/* Teams List */}
+            <div className="grid gap-4">
+              {teams.length === 0 ? (
+                <div className="bg-slate-800 rounded-lg p-12 text-center">
+                  <p className="text-slate-400 text-lg">No teams added yet. Add your first team to start tracking matches!</p>
                 </div>
               ) : (
-                <MatchList
-                  matches={matches}
-                  onToggleWatch={handleToggleWatch}
-                  onRemoveMatch={handleRemoveMatch}
-                  onUpdateTeams={handleUpdateTeams}
-                />
+                teams.map((team) => (
+                  <div
+                    key={team._id}
+                    className="bg-slate-800 rounded-lg p-6 shadow-lg hover:shadow-purple-500/20 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-1">
+                          {team.nickname || team.name}
+                        </h3>
+                        {team.nickname && (
+                          <p className="text-slate-400 text-sm">Full name: {team.name}</p>
+                        )}
+                        {team.livescoreId && (
+                          <p className="text-slate-500 text-xs mt-1">ID: {team.livescoreId}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => deleteTeam(team._id)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </div>
+        )}
+
+        {/* Matches Tab */}
+        {activeTab === 'matches' && (
+          <div className="space-y-4">
+            {matches.length === 0 ? (
+              <div className="bg-slate-800 rounded-lg p-12 text-center">
+                <p className="text-slate-400 text-lg mb-2">No matches scheduled</p>
+                <p className="text-slate-500 text-sm">Matches will appear here after the daily task runs at 00:00 UTC</p>
+              </div>
+            ) : (
+              matches.map((match) => (
+                <div
+                  key={match._id}
+                  className="bg-slate-800 rounded-lg p-6 shadow-lg hover:shadow-purple-500/20 transition-all"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full">
+                      {match.competition}
+                    </span>
+                    <span className="text-slate-400 text-sm">
+                      {formatDateTime(match.matchDateTime)}
+                    </span>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-4 mb-2">
+                      <span className="text-2xl font-bold text-white">{match.homeTeam}</span>
+                      <span className="text-slate-500">vs</span>
+                      <span className="text-2xl font-bold text-white">{match.awayTeam}</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 mt-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${match.status === 'pending'
+                        ? 'bg-yellow-600 text-white'
+                        : 'bg-green-600 text-white'
+                        }`}>
+                        {match.status.toUpperCase()}
+                      </span>
+                      {match.watch && (
+                        <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-xs font-semibold">
+                          👁️ WATCHING
+                        </span>
+                      )}
+                      {match.kickoffannounced && (
+                        <span className="text-green-400 text-xs">⚽ Kickoff</span>
+                      )}
+                      {match.htannounced && (
+                        <span className="text-orange-400 text-xs">🚩 HT</span>
+                      )}
+                      {match.ftannounced && (
+                        <span className="text-red-400 text-xs">🏁 FT</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-12 text-center text-slate-500 text-sm">
+          <p>🤖 Automated by FBLive2 V2 • Updates every 30 seconds</p>
         </div>
       </div>
     </div>

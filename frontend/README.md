@@ -1,151 +1,141 @@
-# FBLive 2 Frontend
+# FBLive2 V2 Frontend
 
-A modern Next.js frontend application for managing and tracking live football matches.
+Modern Next.js frontend for managing teams and viewing live football matches.
 
 ## Features
 
-- **Match Management**: Search, add, edit, and remove matches
-- **Live Tracking Control**: Start/stop live match tracking
-- **Real-time Updates**: Monitor match status and incidents
-- **Responsive Design**: Works on desktop and mobile devices
-- **Modern UI**: Built with Tailwind CSS and Lucide React icons
+✨ **Teams Management**
+- Add new teams with nicknames
+- View all tracked teams
+- Delete teams
 
-## Tech Stack
+📅 **Matches Dashboard**
+- View all scheduled matches
+- Real-time updates (30-second refresh)
+- Match status indicators
+- Competition badges
 
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Beautiful icons
-- **Axios** - HTTP client for API calls
+🎨 **Modern UI**
+- Beautiful gradient design
+- Responsive layout
+- Dark theme
+- Smooth animations
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- The FBLive 2 backend server running on port 3001
+- Node.js 18+ installed
+- Backend server running (default: port 3001)
 
 ### Installation
 
-1. Navigate to the frontend directory:
 ```bash
-cd fblive2/frontend
-```
-
-2. Install dependencies:
-```bash
+cd frontend
 npm install
 ```
 
-3. Start the development server:
+### Configuration
+
+1. Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` to customize backend API URL if needed:
+```env
+# Backend API URL (default: http://localhost:3001)
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+**Note:** Frontend runs on port 3000 by default. To change the port, edit `package.json` scripts.
+
+### Development
+
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+The app will start on the port specified in `.env` (default: http://localhost:3000).
 
-### Building for Production
+### Production Build
 
 ```bash
 npm run build
 npm start
 ```
 
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_API_URL` | Backend API URL | `http://localhost:3001` |
+
+**Note:** The frontend port (3000) is configured in `package.json`. To change it, edit the `-p` flag in the dev/start scripts.
+
+## Usage
+
+### Adding Teams
+
+1. Click "Add New Team" button
+2. Enter team name (e.g., "Manchester United")
+3. Enter nickname (e.g., "Man Utd") - optional
+4. Enter Livescore ID - optional
+5. Click "Add Team"
+
+### Viewing Matches
+
+1. Switch to "Matches" tab
+2. View all scheduled matches
+3. Matches update automatically every 30 seconds
+4. See match status, time, and competition
+
 ## API Integration
 
-The frontend communicates with the FBLive 2 backend API through the following endpoints:
+The frontend connects to the backend API via Next.js rewrites:
 
-### Match Management
-- `GET /api/matches` - Get all matches
-- `POST /api/match/search` - Search and add match by eventID
-- `DELETE /api/match/:id` - Remove match
-- `PATCH /api/match/:id/toggle-watch` - Toggle watch status
-- `PATCH /api/match/:id/teams` - Update team names and competition
+- `GET /api/teams` - Fetch all teams
+- `POST /api/teams` - Add new team
+- `DELETE /api/teams/:id` - Delete team
+- `GET /api/matches` - Fetch all matches
 
-### Live Tracking
-- `POST /api/matches/start-live` - Start live tracking
-- `POST /api/matches/stop-live` - Stop live tracking
+## Tech Stack
+
+- **Next.js 15** - React framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **React Hooks** - State management
 
 ## Project Structure
 
 ```
 frontend/
-├── app/                    # Next.js App Router
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Main page
-├── components/            # React components
-│   ├── LiveTracking.tsx   # Live tracking controls
-│   ├── MatchList.tsx      # Match list display
-│   └── MatchSearch.tsx    # Match search form
-├── lib/                   # Utility libraries
-│   └── api.ts            # API client functions
-├── types/                 # TypeScript type definitions
-│   └── match.ts          # Match-related types
-└── package.json          # Dependencies and scripts
+├── app/
+│   ├── layout.tsx      # Root layout
+│   ├── page.tsx        # Main page (Teams & Matches)
+│   └── globals.css     # Global styles
+├── .env                # Environment variables (create from .env.example)
+├── .env.example        # Example environment variables
+├── next.config.ts      # Next.js configuration
+└── package.json        # Dependencies
 ```
 
-## Usage
+## Customization
 
-### Adding a Match
-1. Enter the match event ID from Livescore in the search field
-2. Click "Add Match" to search and save the match
-3. The match will appear in the matches list
+### Change Frontend Port
 
-### Managing Matches
-- **Toggle Watch**: Click the eye icon to start/stop watching a match
-- **Edit Match**: Click the edit icon to modify team names and competition
-- **Remove Match**: Click the trash icon to delete a match
-
-### Live Tracking
-1. Add matches and set their watch status to "Watching"
-2. Click "Start Tracking" to begin live monitoring
-3. Monitor the backend console for real-time updates
-4. Click "Stop Tracking" to end live monitoring
-
-## Development
-
-### Adding New Features
-1. Create new components in the `components/` directory
-2. Add TypeScript types in the `types/` directory
-3. Extend API functions in `lib/api.ts`
-4. Update the main page to include new functionality
-
-### Styling
-- Use Tailwind CSS utility classes for styling
-- Custom components are defined in `globals.css`
-- Follow the existing design patterns and color scheme
-
-### API Calls
-- All API calls are centralized in `lib/api.ts`
-- Use the `matchApi` object for backend communication
-- Handle errors and loading states appropriately
-
-## Configuration
-
-The frontend is configured to proxy API calls to the backend server running on `localhost:3001`. This is configured in `next.config.js`:
-
-```javascript
-async rewrites() {
-  return [
-    {
-      source: '/api/:path*',
-      destination: 'http://localhost:3001/api/:path*',
-    },
-  ];
-}
+Edit `.env`:
+```env
+PORT=4000
 ```
 
-## Troubleshooting
+### Change Backend URL
 
-### Common Issues
+Edit `.env`:
+```env
+NEXT_PUBLIC_API_URL=http://your-backend-url:3001
+```
 
-1. **API Connection Error**: Ensure the backend server is running on port 3001
-2. **Build Errors**: Check that all dependencies are installed
-3. **TypeScript Errors**: Verify type definitions match the backend API
+## License
 
-### Development Tips
-
-- Use the browser's developer tools to debug API calls
-- Check the Network tab for request/response details
-- Monitor the backend console for live tracking updates
+MIT

@@ -13,18 +13,26 @@
     "install:all": "npm install && cd frontend && npm install",
     "dev:all": "concurrently \"npm run dev\" \"npm run frontend\""
   },
-  "keywords": ["football", "live", "tracking", "matches", "api"],
+  "keywords": [
+    "football",
+    "live",
+    "tracking",
+    "matches",
+    "api"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^8.0.3",
+    "axios": "^1.6.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "axios": "^1.6.2"
+    "express": "^4.18.2",
+    "lucide-react": "^0.563.0",
+    "mongoose": "^8.0.3",
+    "node-cron": "^4.2.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2",
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2"
   }
 }

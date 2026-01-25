@@ -16,6 +16,8 @@ interface Match {
   eventID: string;
   homeTeam: string;
   awayTeam: string;
+  homeTeamId: string | null;
+  awayTeamId: string | null;
   matchDateTime: string;
   competition: string;
   status: string;
@@ -23,6 +25,9 @@ interface Match {
   kickoffannounced: boolean;
   htannounced: boolean;
   ftannounced: boolean;
+  evaluatedIncidents: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function Home() {
@@ -30,6 +35,7 @@ export default function Home() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [activeTab, setActiveTab] = useState<'teams' | 'matches'>('teams');
   const [isAddingTeam, setIsAddingTeam] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [newTeam, setNewTeam] = useState({ name: '', nickname: '', livescoreId: '' });
   const [loading, setLoading] = useState(false);
 
@@ -92,6 +98,33 @@ export default function Home() {
       fetchTeams();
     } catch (error) {
       console.error('Error deleting team:', error);
+    }
+  };
+
+  const updateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTeam) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/teams/${editingTeam._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editingTeam.name,
+          nickname: editingTeam.nickname,
+          livescoreId: editingTeam.livescoreId,
+        }),
+      });
+
+      if (res.ok) {
+        setEditingTeam(null);
+        fetchTeams();
+      }
+    } catch (error) {
+      console.error('Error updating team:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -210,29 +243,84 @@ export default function Home() {
                 </div>
               ) : (
                 teams.map((team) => (
-                  <div
-                    key={team._id}
-                    className="bg-slate-800 rounded-lg p-6 shadow-lg hover:shadow-purple-500/20 transition-all"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white mb-1">
-                          {team.nickname || team.name}
-                        </h3>
-                        {team.nickname && (
-                          <p className="text-slate-400 text-sm">Full name: {team.name}</p>
-                        )}
-                        {team.livescoreId && (
-                          <p className="text-slate-500 text-xs mt-1">ID: {team.livescoreId}</p>
-                        )}
+                  <div key={team._id}>
+                    {editingTeam?._id === team._id ? (
+                      // Edit Form
+                      <form onSubmit={updateTeam} className="bg-slate-800 rounded-lg p-6 shadow-xl">
+                        <h3 className="text-xl font-bold text-white mb-4">Edit Team</h3>
+                        <div className="space-y-4">
+                          <input
+                            type="text"
+                            placeholder="Team Name"
+                            value={editingTeam.name}
+                            onChange={(e) => setEditingTeam({ ...editingTeam, name: e.target.value })}
+                            className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                            required
+                          />
+                          <input
+                            type="text"
+                            placeholder="Nickname"
+                            value={editingTeam.nickname}
+                            onChange={(e) => setEditingTeam({ ...editingTeam, nickname: e.target.value })}
+                            className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Livescore ID"
+                            value={editingTeam.livescoreId}
+                            onChange={(e) => setEditingTeam({ ...editingTeam, livescoreId: e.target.value })}
+                            className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                          />
+                          <div className="flex gap-3">
+                            <button
+                              type="submit"
+                              disabled={loading}
+                              className="flex-1 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all disabled:opacity-50"
+                            >
+                              {loading ? 'Saving...' : 'Save Changes'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingTeam(null)}
+                              className="flex-1 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-600 transition-all"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    ) : (
+                      // Team Card
+                      <div className="bg-slate-800 rounded-lg p-6 shadow-lg hover:shadow-purple-500/20 transition-all">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-2xl font-bold text-white mb-1">
+                              {team.nickname || team.name}
+                            </h3>
+                            {team.nickname && (
+                              <p className="text-slate-400 text-sm">Full name: {team.name}</p>
+                            )}
+                            {team.livescoreId && (
+                              <p className="text-slate-500 text-xs mt-1">ID: {team.livescoreId}</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setEditingTeam(team)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button
+                              onClick={() => deleteTeam(team._id)}
+                              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <button
-                        onClick={() => deleteTeam(team._id)}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
+                    )}
                   </div>
                 ))
               )}
@@ -288,6 +376,21 @@ export default function Home() {
                       )}
                       {match.ftannounced && (
                         <span className="text-red-400 text-xs">🏁 FT</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Match details */}
+                  <div className="border-t border-slate-700 pt-3 mt-3">
+                    <div className="flex justify-between items-center text-xs text-slate-400">
+                      <div>
+                        <span className="font-semibold">Event ID:</span> {match.eventID}
+                      </div>
+                      {match.homeTeamId && (
+                        <div>
+                          <span className="font-semibold">Tracked:</span> {match.homeTeam}
+                          {match.awayTeamId && ` & ${match.awayTeam}`}
+                        </div>
                       )}
                     </div>
                   </div>

@@ -92,9 +92,17 @@ export async function scheduleMatch(match) {
         const matchTime = new Date(match.matchDateTime);
         const delay = matchTime - now;
 
-        // Only schedule future matches
+        // If match has already started, schedule it immediately
         if (delay <= 0) {
-            console.log(`⚠️  Match already started: ${match.homeTeam} vs ${match.awayTeam}`);
+            console.log(`⚠️  Match already started: ${match.homeTeam} vs ${match.awayTeam} - Starting immediately`);
+
+            // Calculate and store priority
+            const priority = await getMatchPriority(match);
+            match.priority = priority;
+            await match.save();
+
+            // Start the match immediately
+            await handleMatchStart(match._id);
             return;
         }
 

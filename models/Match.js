@@ -7,8 +7,23 @@ const matchSchema = new mongoose.Schema({
   homeTeamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', default: null },
   awayTeamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', default: null },
   matchDateTime: { type: Date }, // Match date and time (UTC timezone)
-  status: { type: String, default: 'pending' },
-  watch: { type: Boolean, default: false },
+  status: {
+    type: String,
+    enum: ['pending', 'live', 'ended', 'skipped'],
+    default: 'pending'
+  },
+  priority: {
+    type: Number,
+    default: 100  // Lower = higher priority
+  },
+  skippedReason: {
+    type: String,
+    default: ''
+  },
+  watch: {
+    type: Boolean,
+    default: false
+  },
   kickoffannounced: { type: Boolean, default: false },
   htannounced: { type: Boolean, default: false },
   ftannounced: { type: Boolean, default: false },

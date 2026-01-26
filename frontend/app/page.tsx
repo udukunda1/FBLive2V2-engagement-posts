@@ -7,6 +7,7 @@ interface Team {
   name: string;
   nickname: string;
   livescoreId: string;
+  priority: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +22,8 @@ interface Match {
   matchDateTime: string;
   competition: string;
   status: string;
+  priority: number;
+  skippedReason: string;
   watch: boolean;
   kickoffannounced: boolean;
   htannounced: boolean;
@@ -36,7 +39,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'teams' | 'matches'>('teams');
   const [isAddingTeam, setIsAddingTeam] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
-  const [newTeam, setNewTeam] = useState({ name: '', nickname: '', livescoreId: '' });
+  const [newTeam, setNewTeam] = useState({ name: '', nickname: '', livescoreId: '', priority: 5 });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -79,7 +82,7 @@ export default function Home() {
       });
 
       if (res.ok) {
-        setNewTeam({ name: '', nickname: '', livescoreId: '' });
+        setNewTeam({ name: '', nickname: '', livescoreId: '', priority: 5 });
         setIsAddingTeam(false);
         fetchTeams();
       }
@@ -114,6 +117,7 @@ export default function Home() {
           name: editingTeam.name,
           nickname: editingTeam.nickname,
           livescoreId: editingTeam.livescoreId,
+          priority: editingTeam.priority,
         }),
       });
 
@@ -212,6 +216,22 @@ export default function Home() {
                     onChange={(e) => setNewTeam({ ...newTeam, livescoreId: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
                   />
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">
+                      ⭐ Priority (1=highest, 10=lowest)
+                    </label>
+                    <select
+                      value={newTeam.priority}
+                      onChange={(e) => setNewTeam({ ...newTeam, priority: parseInt(e.target.value) })}
+                      className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                        <option key={num} value={num}>
+                          {num} {num === 1 ? '(Highest)' : num === 10 ? '(Lowest)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="flex gap-3">
                     <button
                       type="submit"
@@ -224,7 +244,7 @@ export default function Home() {
                       type="button"
                       onClick={() => {
                         setIsAddingTeam(false);
-                        setNewTeam({ name: '', nickname: '', livescoreId: '' });
+                        setNewTeam({ name: '', nickname: '', livescoreId: '', priority: 5 });
                       }}
                       className="flex-1 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-600 transition-all"
                     >
@@ -271,6 +291,22 @@ export default function Home() {
                             onChange={(e) => setEditingTeam({ ...editingTeam, livescoreId: e.target.value })}
                             className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
                           />
+                          <div>
+                            <label className="block text-sm text-slate-300 mb-2">
+                              ⭐ Priority (1=highest, 10=lowest)
+                            </label>
+                            <select
+                              value={editingTeam.priority}
+                              onChange={(e) => setEditingTeam({ ...editingTeam, priority: parseInt(e.target.value) })}
+                              className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                            >
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                <option key={num} value={num}>
+                                  {num} {num === 1 ? '(Highest)' : num === 10 ? '(Lowest)' : ''}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                           <div className="flex gap-3">
                             <button
                               type="submit"
@@ -303,6 +339,11 @@ export default function Home() {
                             {team.livescoreId && (
                               <p className="text-slate-500 text-xs mt-1">ID: {team.livescoreId}</p>
                             )}
+                            <div className="mt-2">
+                              <span className="inline-block px-2 py-1 bg-purple-600 text-white text-xs rounded">
+                                ⭐ Priority: {team.priority}
+                              </span>
+                            </div>
                           </div>
                           <div className="flex gap-2">
                             <button
@@ -356,10 +397,15 @@ export default function Home() {
                       <span className="text-slate-500">vs</span>
                       <span className="text-2xl font-bold text-white">{match.awayTeam}</span>
                     </div>
-                    <div className="flex items-center justify-center gap-3 mt-3">
+                    {/* Status badges */}
+                    <div className="flex items-center justify-center gap-2 flex-wrap mb-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${match.status === 'pending'
                         ? 'bg-yellow-600 text-white'
-                        : 'bg-green-600 text-white'
+                        : match.status === 'ended'
+                          ? 'bg-gray-600 text-white'
+                          : match.status === 'skipped'
+                            ? 'bg-red-600 text-white'
+                            : 'bg-green-600 text-white'
                         }`}>
                         {match.status.toUpperCase()}
                       </span>
@@ -369,15 +415,24 @@ export default function Home() {
                         </span>
                       )}
                       {match.kickoffannounced && (
-                        <span className="text-green-400 text-xs">⚽ Kickoff</span>
+                        <span className="px-2 py-1 bg-green-500 text-white rounded text-xs">⚽ Kickoff</span>
                       )}
                       {match.htannounced && (
-                        <span className="text-orange-400 text-xs">🚩 HT</span>
+                        <span className="px-2 py-1 bg-orange-500 text-white rounded text-xs">🚩 HT</span>
                       )}
                       {match.ftannounced && (
-                        <span className="text-red-400 text-xs">🏁 FT</span>
+                        <span className="px-2 py-1 bg-red-500 text-white rounded text-xs">🏁 FT</span>
                       )}
                     </div>
+
+                    {/* Skip reason */}
+                    {match.status === 'skipped' && match.skippedReason && (
+                      <div className="bg-red-900/30 border border-red-600 rounded-lg p-2 mb-3">
+                        <p className="text-red-300 text-xs text-center">
+                          ⚠️ {match.skippedReason}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Match details */}

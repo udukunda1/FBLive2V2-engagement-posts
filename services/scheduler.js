@@ -149,6 +149,63 @@ export async function fetchTodayMatches() {
     }
 }
 
+// Post today's scheduled matches to Facebook
+async function postTodayMatchesToFacebook() {
+    try {
+        const access_token = process.env.FACEBOOK_ACCESS_TOKEN;
+        const page_id = process.env.FACEBOOK_PAGE_ID;
+
+        if (!access_token || !page_id) {
+            console.log('⚠️  No Facebook credentials found, skipping post');
+            return;
+        }
+
+        // Get all scheduled matches (not skipped)
+        const scheduledMatches = await Match.find({
+            status: { $in: ['pending', 'live'] }
+        }).sort({ matchDateTime: 1 });
+
+        if (scheduledMatches.length === 0) {
+            console.log('📭 No matches to post to Facebook');
+            return;
+        }
+
+        // Build the message
+        let message = `⚽ TODAY'S MATCHES ⚽\n\n`;
+
+        scheduledMatches.forEach((match, index) => {
+            const matchTime = new Date(match.matchDateTime);
+            // Add 2 hours for local time (UTC+2)
+            const localTime = new Date(matchTime.getTime() + (2 * 60 * 60 * 1000));
+            const hours = String(localTime.getUTCHours()).padStart(2, '0');
+            const minutes = String(localTime.getUTCMinutes()).padStart(2, '0');
+
+            message += `${index + 1}. ${match.homeTeam} vs ${match.awayTeam}\n`;
+            message += `   🏆 ${match.competition}\n`;
+            message += `   🕐 ${hours}:${minutes}\n\n`;
+        });
+
+        message += `Total: ${scheduledMatches.length} match${scheduledMatches.length > 1 ? 'es' : ''} scheduled\n`;
+        message += `\n#Football #Soccer #LiveMatches`;
+
+        // Post to Facebook
+        const data = { message, access_token };
+        const fbResponse = await axios.post(
+            `https://graph.facebook.com/v23.0/${page_id}/feed`,
+            null,
+            { params: data }
+        );
+
+        const postId = fbResponse?.data?.id || null;
+        console.log(`📘 Posted today's matches to Facebook${postId ? ` (id: ${postId})` : ''}`);
+
+        return postId;
+    } catch (error) {
+        console.error('❌ Error posting to Facebook:', error.response?.data || error.message);
+        return null;
+    }
+}
+
 // Run daily task
 export async function runDailyTask() {
     console.log('\n═══════════════════════════════════════');
@@ -157,6 +214,7 @@ export async function runDailyTask() {
 
     await deleteAllMatches();
     await fetchTodayMatches();
+    await postTodayMatchesToFacebook();
 
     console.log('\n═══════════════════════════════════════');
     console.log('✅ DAILY TASK COMPLETED');

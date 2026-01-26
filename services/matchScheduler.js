@@ -1,4 +1,5 @@
 import Match from '../models/Match.js';
+import Team from '../models/Team.js';
 import { processMatch } from '../controllers/matchController.js';
 
 // Store active timeouts
@@ -7,28 +8,136 @@ const activeTimeouts = new Map();
 // Store active polling intervals
 const activeIntervals = new Map();
 
-// Schedule a match to auto-start at its scheduled time
+// Calculate match priority based on team rankings
+async function getMatchPriority(match) {
+    try {
+        let homeTeam = null;
+        let awayTeam = null;
+
+        if (match.homeTeamId) {
+            homeTeam = await Team.findById(match.homeTeamId);
+        }
+        if (match.awayTeamId) {
+            awayTeam = await Team.findById(match.awayTeamId);
+        }
+
+        if (homeTeam && awayTeam) {
+            // Both teams tracked: average priority
+            return (homeTeam.priority + awayTeam.priority) / 2;
+        } else if (homeTeam || awayTeam) {
+            // Only one team tracked: (11 + priority) / 2
+            const trackedTeam = homeTeam || awayTeam;
+            return (11 + trackedTeam.priority) / 2;
+        }
+
+        return 100; // No tracked teams (lowest priority)
+    } catch (error) {
+        console.error('Error calculating match priority:', error.message);
+        return 100;
+    }
+}
+
+// Get matches within ±2 hours of given time
+async function getActiveMatches(matchTime) {
+    const twoHoursBefore = new Date(matchTime.getTime() - (2 * 60 * 60 * 1000));
+    const twoHoursAfter = new Date(matchTime.getTime() + (2 * 60 * 60 * 1000));
+
+    return await Match.find({
+        matchDateTime: { $gte: twoHoursBefore, $lte: twoHoursAfter },
+        status: { $in: ['pending', 'live'] }
+    });
+}
+
+// Check if match should be scheduled based on concurrent limit
+async function shouldScheduleMatch(match, matchTime) {
+    const activeMatches = await getActiveMatches(matchTime);
+
+    // Filter out the current match if it's already in the list
+    const otherMatches = activeMatches.filter(m => m._id.toString() !== match._id.toString());
+
+    if (otherMatches.length < 3) {
+        return { shouldSchedule: true, reason: 'Under limit' };
+    }
+
+    if (otherMatches.length === 3) {
+        const newPriority = await getMatchPriority(match);
+
+        // Sort descending (higher priority number = lower priority)
+        // When tied, bump the most recently created match (last scheduled)
+        const sorted = otherMatches.sort((a, b) => {
+            if (a.priority === b.priority) {
+                return new Date(b.createdAt) - new Date(a.createdAt); // Descending - most recent first
+            }
+            return b.priority - a.priority; // Descending
+        });
+
+        const lowestPriorityMatch = sorted[0];
+
+        if (newPriority < lowestPriorityMatch.priority) {
+            return {
+                shouldSchedule: true,
+                reason: 'Higher priority (lower number)',
+                bumpMatch: lowestPriorityMatch
+            };
+        }
+    }
+
+    return { shouldSchedule: false, reason: 'Limit reached (3/3)' };
+}
+
+// Schedule a match with priority-based limit checking
 export async function scheduleMatch(match) {
     try {
         const now = new Date();
         const matchTime = new Date(match.matchDateTime);
-        // console.log(matchTime, now);
         const delay = matchTime - now;
 
         // Only schedule future matches
-        if (delay > 0) {
-            const timeoutId = setTimeout(async () => {
-                await handleMatchStart(match._id);
-            }, delay);
-
-            // Store timeout ID
-            activeTimeouts.set(match._id.toString(), timeoutId);
-
-            const minutesUntil = Math.round(delay / 60000);
-            console.log(`⏰ Scheduled: ${match.homeTeam} vs ${match.awayTeam} in ${minutesUntil} minutes`);
-        } else {
+        if (delay <= 0) {
             console.log(`⚠️  Match already started: ${match.homeTeam} vs ${match.awayTeam}`);
+            return;
         }
+
+        // Calculate and store priority
+        const priority = await getMatchPriority(match);
+        match.priority = priority;
+        await match.save();
+
+        // Check if should schedule based on concurrent limit
+        const decision = await shouldScheduleMatch(match, matchTime);
+
+        if (!decision.shouldSchedule) {
+            // Mark as skipped
+            match.status = 'skipped';
+            match.skippedReason = decision.reason;
+            await match.save();
+            console.log(`⏭️  SKIPPED: ${match.homeTeam} vs ${match.awayTeam} - ${decision.reason}`);
+            return;
+        }
+
+        // If bumping another match
+        if (decision.bumpMatch) {
+            const bumpedMatch = decision.bumpMatch;
+            bumpedMatch.status = 'skipped';
+            bumpedMatch.skippedReason = `Bumped by higher priority match`;
+            await bumpedMatch.save();
+
+            // Cancel its schedule
+            cancelMatchSchedule(bumpedMatch._id);
+
+            console.log(`🔄 BUMPED: ${bumpedMatch.homeTeam} vs ${bumpedMatch.awayTeam} (priority ${bumpedMatch.priority})`);
+        }
+
+        // Schedule the match
+        const timeoutId = setTimeout(async () => {
+            await handleMatchStart(match._id);
+        }, delay);
+
+        // Store timeout ID
+        activeTimeouts.set(match._id.toString(), timeoutId);
+
+        const minutesUntil = Math.round(delay / 60000);
+        console.log(`⏰ Scheduled: ${match.homeTeam} vs ${match.awayTeam} (priority ${priority}) in ${minutesUntil} minutes`);
     } catch (error) {
         console.error(`❌ Error scheduling match:`, error.message);
     }

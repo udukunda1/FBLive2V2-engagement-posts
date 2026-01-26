@@ -14,8 +14,13 @@ const teamSchema = new mongoose.Schema({
     },
     livescoreId: {
         type: String,
-        default: '',
-        trim: true
+        default: ''
+    },
+    priority: {
+        type: Number,
+        default: 5,
+        min: 1,
+        max: 10
     }
 }, {
     timestamps: true

@@ -8,6 +8,7 @@ interface Team {
   nickname: string;
   livescoreId: string;
   priority: number;
+  trackStatus: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,7 +40,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'teams' | 'matches'>('teams');
   const [isAddingTeam, setIsAddingTeam] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
-  const [newTeam, setNewTeam] = useState({ name: '', nickname: '', livescoreId: '', priority: 5 });
+  const [newTeam, setNewTeam] = useState({ name: '', nickname: '', livescoreId: '', priority: 5, trackStatus: true });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -82,7 +83,7 @@ export default function Home() {
       });
 
       if (res.ok) {
-        setNewTeam({ name: '', nickname: '', livescoreId: '', priority: 5 });
+        setNewTeam({ name: '', nickname: '', livescoreId: '', priority: 5, trackStatus: true });
         setIsAddingTeam(false);
         fetchTeams();
       }
@@ -118,6 +119,7 @@ export default function Home() {
           nickname: editingTeam.nickname,
           livescoreId: editingTeam.livescoreId,
           priority: editingTeam.priority,
+          trackStatus: editingTeam.trackStatus,
         }),
       });
 
@@ -232,6 +234,27 @@ export default function Home() {
                       ))}
                     </select>
                   </div>
+                  <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                    <div>
+                      <label className="block text-sm font-semibold text-white mb-1">
+                        🎯 Track Matches
+                      </label>
+                      <p className="text-xs text-slate-400">
+                        Enable to discover matches for this team
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setNewTeam({ ...newTeam, trackStatus: !newTeam.trackStatus })}
+                      className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${newTeam.trackStatus ? 'bg-green-600' : 'bg-slate-600'
+                        }`}
+                    >
+                      <span
+                        className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${newTeam.trackStatus ? 'translate-x-7' : 'translate-x-1'
+                          }`}
+                      />
+                    </button>
+                  </div>
                   <div className="flex gap-3">
                     <button
                       type="submit"
@@ -244,7 +267,7 @@ export default function Home() {
                       type="button"
                       onClick={() => {
                         setIsAddingTeam(false);
-                        setNewTeam({ name: '', nickname: '', livescoreId: '', priority: 5 });
+                        setNewTeam({ name: '', nickname: '', livescoreId: '', priority: 5, trackStatus: true });
                       }}
                       className="flex-1 py-3 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-600 transition-all"
                     >
@@ -307,6 +330,27 @@ export default function Home() {
                               ))}
                             </select>
                           </div>
+                          <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                            <div>
+                              <label className="block text-sm font-semibold text-white mb-1">
+                                🎯 Track Matches
+                              </label>
+                              <p className="text-xs text-slate-400">
+                                Enable to discover matches for this team
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setEditingTeam({ ...editingTeam, trackStatus: !editingTeam.trackStatus })}
+                              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${editingTeam.trackStatus ? 'bg-green-600' : 'bg-slate-600'
+                                }`}
+                            >
+                              <span
+                                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${editingTeam.trackStatus ? 'translate-x-7' : 'translate-x-1'
+                                  }`}
+                              />
+                            </button>
+                          </div>
                           <div className="flex gap-3">
                             <button
                               type="submit"
@@ -339,9 +383,13 @@ export default function Home() {
                             {team.livescoreId && (
                               <p className="text-slate-500 text-xs mt-1">ID: {team.livescoreId}</p>
                             )}
-                            <div className="mt-2">
+                            <div className="mt-2 flex gap-2">
                               <span className="inline-block px-2 py-1 bg-purple-600 text-white text-xs rounded">
                                 ⭐ Priority: {team.priority}
+                              </span>
+                              <span className={`inline-block px-2 py-1 text-white text-xs rounded ${team.trackStatus ? 'bg-green-600' : 'bg-gray-600'
+                                }`}>
+                                {team.trackStatus ? '🎯 Tracking' : '📝 Reference Only'}
                               </span>
                             </div>
                           </div>

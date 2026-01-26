@@ -9,6 +9,7 @@ const activeTimeouts = new Map();
 const activeIntervals = new Map();
 
 // Calculate match priority based on team rankings
+// Note: All teams in database can contribute priority, but only trackStatus: true teams trigger match discovery
 async function getMatchPriority(match) {
     try {
         let homeTeam = null;

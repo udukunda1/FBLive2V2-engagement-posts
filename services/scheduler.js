@@ -27,6 +27,7 @@ export function parseMatchDateTime(esdString) {
 }
 
 // Get team display name (nickname if exists, else original name)
+// Works for all teams regardless of trackStatus
 async function getTeamDisplayName(teamName) {
     const team = await Team.findOne({ name: teamName });
     if (team) {
@@ -35,7 +36,8 @@ async function getTeamDisplayName(teamName) {
     return teamName;
 }
 
-// Get team ID if exists
+// Get team ID if exists (regardless of trackStatus)
+// This allows non-tracked teams to still contribute priority to matches
 async function getTeamId(teamName) {
     const team = await Team.findOne({ name: teamName });
     return team ? team._id : null;
@@ -62,10 +64,10 @@ export async function fetchTodayMatches() {
     try {
         console.log('📥 Fetching today\'s matches...');
 
-        // Get all tracked teams
-        const trackedTeams = await Team.find();
+        // Get all tracked teams (only those with trackStatus: true)
+        const trackedTeams = await Team.find({ trackStatus: true });
         if (trackedTeams.length === 0) {
-            console.log('⚠️  No teams in database. Add teams first!');
+            console.log('⚠️  No teams marked for tracking. Add teams and enable tracking first!');
             return;
         }
 

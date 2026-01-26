@@ -13,7 +13,7 @@ export const getAllTeams = async (req, res) => {
 // Create new team
 export const createTeam = async (req, res) => {
     try {
-        const { name, nickname, livescoreId, priority } = req.body;
+        const { name, nickname, livescoreId, priority, trackStatus } = req.body;
 
         if (!name || !name.trim()) {
             return res.status(400).json({ error: 'Team name is required' });
@@ -23,7 +23,8 @@ export const createTeam = async (req, res) => {
             name: name.trim(),
             nickname: nickname?.trim() || '',
             livescoreId: livescoreId?.trim() || '',
-            priority: priority !== undefined ? priority : 5
+            priority: priority !== undefined ? priority : 5,
+            trackStatus: trackStatus !== undefined ? trackStatus : true
         });
 
         await team.save();
@@ -40,7 +41,7 @@ export const createTeam = async (req, res) => {
 export const updateTeam = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, nickname, livescoreId, priority } = req.body;
+        const { name, nickname, livescoreId, priority, trackStatus } = req.body;
 
         const team = await Team.findById(id);
         if (!team) {
@@ -58,6 +59,9 @@ export const updateTeam = async (req, res) => {
         }
         if (priority !== undefined) {
             team.priority = priority;
+        }
+        if (trackStatus !== undefined) {
+            team.trackStatus = trackStatus;
         }
 
         await team.save();

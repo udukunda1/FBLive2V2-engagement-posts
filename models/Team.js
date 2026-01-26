@@ -21,6 +21,10 @@ const teamSchema = new mongoose.Schema({
         default: 5,
         min: 1,
         max: 10
+    },
+    trackStatus: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

@@ -173,6 +173,15 @@ async function handleMatchStart(matchId) {
 // Start live tracking with polling
 async function startLiveTracking(match) {
     try {
+        const matchIdStr = match._id.toString();
+
+        // Check if interval already exists for this match
+        if (activeIntervals.has(matchIdStr)) {
+            console.log(`⚠️  Interval already exists for ${match.homeTeam} vs ${match.awayTeam}, clearing old interval`);
+            clearInterval(activeIntervals.get(matchIdStr));
+            activeIntervals.delete(matchIdStr);
+        }
+
         // Process match immediately
         await processMatch(match);
 
@@ -198,7 +207,7 @@ async function startLiveTracking(match) {
         }, 30000); // 30 seconds
 
         // Store interval ID
-        activeIntervals.set(match._id.toString(), intervalId);
+        activeIntervals.set(matchIdStr, intervalId);
 
         console.log(`✅ Live tracking started with 30-second polling`);
     } catch (error) {

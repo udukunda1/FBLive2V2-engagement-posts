@@ -25,10 +25,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fblive2v2
     console.log('\n🔄 Running daily task on startup...');
     await runDailyTask();
 
-    // Re-schedule pending matches (server resilience)
-    console.log('\n📅 Re-scheduling pending matches...');
-    await scheduleAllPendingMatches();
-
     // Initialize daily scheduler
     initializeScheduler();
     console.log('\n✅ V2 Automation Ready!\n');

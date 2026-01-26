@@ -92,8 +92,16 @@ export async function scheduleMatch(match) {
         const matchTime = new Date(match.matchDateTime);
         const delay = matchTime - now;
 
-        // If match has already started, schedule it immediately
+        // If match has already started, check if it's still live
         if (delay <= 0) {
+            const twoHoursAfterStart = new Date(matchTime.getTime() + (2 * 60 * 60 * 1000));
+            const matchHasEnded = now > twoHoursAfterStart;
+
+            if (matchHasEnded) {
+                console.log(`⏹️  Match has already ended: ${match.homeTeam} vs ${match.awayTeam} (more than 2 hours past start time)`);
+                return;
+            }
+
             console.log(`⚠️  Match already started: ${match.homeTeam} vs ${match.awayTeam} - Starting immediately`);
 
             // Calculate and store priority

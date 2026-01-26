@@ -41,7 +41,7 @@ app.use('/api', matchRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'FBLive 2 API is running' });
+  res.json({ status: 'OK', message: 'FBLive 2 v2 API is running' });
 });
 
 // Error handling middleware

@@ -38,13 +38,13 @@ async function getMatchPriority(match) {
     }
 }
 
-// Get matches within ±2 hours of given time
+// Get matches within ±1h58min of given time (allows matches exactly 2 hours apart)
 async function getActiveMatches(matchTime) {
-    const twoHoursBefore = new Date(matchTime.getTime() - (2 * 60 * 60 * 1000));
-    const twoHoursAfter = new Date(matchTime.getTime() + (2 * 60 * 60 * 1000));
+    const windowBefore = new Date(matchTime.getTime() - (118 * 60 * 1000)); // 1h58min
+    const windowAfter = new Date(matchTime.getTime() + (118 * 60 * 1000)); // 1h58min
 
     return await Match.find({
-        matchDateTime: { $gte: twoHoursBefore, $lte: twoHoursAfter },
+        matchDateTime: { $gte: windowBefore, $lte: windowAfter },
         status: { $in: ['pending', 'live'] }
     });
 }
@@ -95,11 +95,11 @@ export async function scheduleMatch(match) {
 
         // If match has already started, check if it's still live
         if (delay <= 0) {
-            const twoHoursAfterStart = new Date(matchTime.getTime() + (2 * 60 * 60 * 1000));
-            const matchHasEnded = now > twoHoursAfterStart;
+            const windowAfterStart = new Date(matchTime.getTime() + (118 * 60 * 1000)); // 1h58min
+            const matchHasEnded = now > windowAfterStart;
 
             if (matchHasEnded) {
-                console.log(`⏹️  Match has already ended: ${match.homeTeam} vs ${match.awayTeam} (more than 2 hours past start time)`);
+                console.log(`⏹️  Match has already ended: ${match.homeTeam} vs ${match.awayTeam} (more than 1h58min past start time)`);
                 return;
             }
 

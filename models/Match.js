@@ -28,7 +28,8 @@ const matchSchema = new mongoose.Schema({
   htannounced: { type: Boolean, default: false },
   ftannounced: { type: Boolean, default: false },
   competition: { type: String, default: '' },
-  evaluatedIncidents: { type: [String], default: [] } // Store incident IDs that have been evaluated
+  evaluatedIncidents: { type: [String], default: [] }, // Store incident IDs that have been evaluated
+  predictionScheduled: { type: Boolean, default: false } // Track if prediction post has been scheduled
 }, {
   timestamps: true
 });

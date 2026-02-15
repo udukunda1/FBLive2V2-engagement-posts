@@ -3,6 +3,8 @@ import axios from 'axios';
 import Match from '../models/Match.js';
 import Team from '../models/Team.js';
 import { scheduleMatch, cancelAllSchedules } from './matchScheduler.js';
+import { schedulePredictionPosts, cancelAllPredictionSchedules } from './predictionScheduler.js';
+import { scheduleEngagementPosts, cancelAllEngagementSchedules } from './engagementScheduler.js';
 
 // Format date for Livescore API (YYYYMMDD)
 export function formatDateForAPI(date) {
@@ -50,6 +52,8 @@ export async function deleteAllMatches() {
 
         // Cancel all active schedules
         await cancelAllSchedules();
+        await cancelAllPredictionSchedules();
+        await cancelAllEngagementSchedules();
 
         // Delete all matches
         const result = await Match.deleteMany({});
@@ -217,6 +221,8 @@ export async function runDailyTask() {
     await deleteAllMatches();
     await fetchTodayMatches();
     await postTodayMatchesToFacebook();
+    await schedulePredictionPosts();
+    await scheduleEngagementPosts();
 
     console.log('\n═══════════════════════════════════════');
     console.log('✅ DAILY TASK COMPLETED');

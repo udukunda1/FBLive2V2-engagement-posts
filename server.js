@@ -5,9 +5,6 @@ import dotenv from 'dotenv';
 import matchRoutes from './routes/matchRoutes.js';
 import teamRoutes from './routes/teamRoutes.js';
 import { initializeScheduler, runDailyTask } from './services/scheduler.js';
-import { scheduleAllPendingMatches } from './services/matchScheduler.js';
-import { reschedulePendingPredictions } from './services/predictionScheduler.js';
-import { rescheduleEngagementPosts } from './services/engagementScheduler.js';
 
 dotenv.config();
 
@@ -26,12 +23,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fblive2v2
     // Run daily task on startup (server resilience)
     console.log('\n🔄 Running daily task on startup...');
     await runDailyTask();
-
-    // Re-schedule any pending predictions (in case server restarted mid-day)
-    await reschedulePendingPredictions();
-
-    // Re-schedule engagement posts (in case server restarted mid-day)
-    await rescheduleEngagementPosts();
 
     // Initialize daily scheduler
     initializeScheduler();

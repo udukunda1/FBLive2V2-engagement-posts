@@ -1,378 +1,175 @@
-// Engagement posts data - 31 days, 10 questions per day
-// Odd positions (1,3,5,7,9): English
-// Even positions (2,4,6,8,10): Kinyarwanda
-
 export const engagementPosts = {
-    day1: [
-        "Are you placing a ticket today or watching others win? 👀",
-        "Uyu munsi urashyiramo amafaranga angahe cyangwa uri kuruhuka? 😅",
-        "Be honest… do you say 'last ticket' and then place 3 more? 😂",
-        "Iyo utsinzwe, uvuga ko 'ni system yanze' cyangwa wemera amakosa yawe? 🤔",
-        "What's your betting personality: Calculator 🧠 or Gambler 🎲?",
-        "Wowe uri mu bantu bavuga ngo 'uyu munsi ndasubirana' nyuma yo gutsindwa? 😆",
-        "How many times have you said: 'This one is 100% sure'? 💀",
-        "Iyo odds ari 1.20 gusa, urayifata cyangwa uravuga ngo ni nto cyane?",
-        "When you win, do you feel like a genius? 🏆😂",
-        "Iyo utsinze, wumva umeze nk'umutoza wa Champions League? 😎"
-    ],
-    day2: [
-        "Do you check your ticket 100 times before the match starts? 📱😅",
-        "Urashyira ticket ugasohoka hanze kugira ngo utayirebere? 🙈",
-        "What's worse: Losing by 1 goal or by a red card? 😤",
-        "Iyo umukinnyi wawe yashwe penalty, wumva ute? Urashaka kurira? 😭",
-        "Have you ever blamed the referee for your lost ticket? 🤷‍♂️",
-        "Wowe uri mu bantu bavuga ngo 'referee yatwiye' iyo batsinzwe? 😂",
-        "Do you celebrate more when you win or when your friend loses? 🎉💀",
-        "Iyo inshuti yawe yatsinze nawe watsinzwe, wumva ute mu mutima? 💔",
-        "Quick question: Do you trust low odds or high odds? 🤔",
-        "Ese wowe urashyira odds nkeya cyangwa odds nini? Ni iyihe ikugirira akamaro? 🎯"
-    ],
-    day3: [
-        "Ever placed a bet just because 'everyone is picking it'? 🐑",
-        "Wowe urakurikira itsinda cyangwa ufite ibyo wemera wenyine? 🤓",
-        "How do you feel when your last game is at 90+3'? ⏰😰",
-        "Iyo umukino wa nyuma uri mu dakika ya 90, wumva umeze ute? 😬",
-        "Do you cash out early or risk it all? 💰🎲",
-        "Ese urashyira cashout cyangwa urategereza kugeza imperuka? 🤑",
-        "Have you ever won and immediately placed another bet? 😂",
-        "Iyo utsinze, urashyira ticket yindi ako kanya cyangwa urategereza? 🔄",
-        "Be real: Do you bet with your brain or your heart? ❤️🧠",
-        "Ese urashyira ticket ukurikije ibyo wibwira cyangwa ukurikije amarangamutima? 🎭"
-    ],
-    day4: [
-        "What's your reaction when VAR cancels your winning goal? 🤬📺",
-        "Iyo VAR yangije igitego cyawe, wumva ute? Urashaka guhungabana? 😡",
-        "Do you ever regret not adding 'just one more game'? 🤦‍♂️",
-        "Wowe wigeze kwicuza ko utashyizeho umukino umwe wongeyeho? 😅",
-        "How many 'sure bets' have you lost this month? 💀",
-        "Ese uku kwezi watsinzwe ticket zingahe wavuze ko 'zizatsinda'? 🙃",
-        "Do you trust your gut feeling or stats? 📊🔮",
-        "Wowe uremera ibyiyumviro byawe cyangwa statistike? Ni iki gikugirira akamaro? 📈",
-        "Ever blamed your friend for suggesting a bad pick? 😂👊",
-        "Wigeze gushinja inshuti yawe ko yakugiriye inama mbi? 🤝💥"
-    ],
-    day5: [
-        "Do you have a 'lucky day' for betting? 🍀",
-        "Ese ufite umunsi uvuga ko 'ni umunsi mwiza wo gutsinda'? 🌟",
-        "What do you do after losing 3 tickets in a row? 😭",
-        "Iyo watsinzwe ticket eshatu zikurikirana, ukora iki? Urareka cyangwa ukomeza? 💪",
-        "Have you ever won big and kept it a secret? 🤐💰",
-        "Wigeze gutsinda amafaranga menshi ukabibika ibanga? 🤫",
-        "Do you bet more when you're winning or losing? 📈📉",
-        "Ese urashyira amafaranga menshi iyo utsinda cyangwa iyo utsindwa? 🎰",
-        "Quick poll: Single bets or accumulators? 🎯",
-        "Wowe urashyira single bets cyangwa accumulator? Ni iyihe ukunda? ⚡"
-    ],
-    day6: [
-        "Ever checked the score and your heart just dropped? 💔📱",
-        "Wigeze kureba amanota ukumva umutima wawe ugwa? 😨",
-        "Do you analyze games or just pick random teams? 🎲🔍",
-        "Ese urashakisha amakuru mbere yo gushyira ticket cyangwa uratoranya gusa? 🤷",
-        "What's your biggest betting regret? 🤔💸",
-        "Ni iki cyaguhungabanije cyane mu gushyira amafaranga? 😓",
-        "Do you bet on your favorite team even when they're losing? ❤️⚽",
-        "Urashyira ticket ku ikipe ukunda nubwo itsinzwe kenshi? 🏆",
-        "Have you ever celebrated too early? 😂🎉",
-        "Wigeze kwishimira vuba cyane mbere yuko umukino urangira? 🙈"
-    ],
-    day7: [
-        "Do you believe in 'beginner's luck'? 🍀😅",
-        "Ese wemera ko hari 'amahirwe yo gutangira'? 🎰",
-        "What's your go-to excuse when you lose? 🤷‍♂️",
-        "Ni iyihe mpamvu uvuga iyo utsinzwe? 'Referee', 'odds', cyangwa ikindi? 😂",
-        "Ever placed a bet at the last minute and regretted it? ⏰😬",
-        "Wigeze gushyira ticket mu minota ya nyuma ukayicuza? 🏃‍♂️",
-        "Do you follow tipsters or trust yourself? 👨‍🏫🧠",
-        "Ese urakurikira tipsters cyangwa wiyemera wenyine? 🎯",
-        "How do you cope with a losing streak? 😭💪",
-        "Iyo utsinzwe inshuro nyinshi zikurikirana, ukora iki kugira ngo ukomeze? 🔥"
-    ],
-    day8: [
-        "Do you bet every day or only on weekends? 📅",
-        "Ese urashyira ticket buri munsi cyangwa gusa mu mpera z'icyumweru? 🗓️",
-        "What's the longest you've gone without betting? 🤔⏳",
-        "Ni igihe kingana iki wagiye utashyira ticket? Iminsi, amezi? 😅",
-        "Ever won and thought 'I should quit while I'm ahead'? 💰🚪",
-        "Wigeze gutsinda ukibwira ko 'ngomba guhagarara nonaha'? 🛑",
-        "Do you prefer betting on football or other sports? ⚽🏀",
-        "Wowe ukunda gushyira ticket kuri football cyangwa siporo zindi? 🎾",
-        "Have you ever lost because you got too greedy? 😂💸",
-        "Wigeze gutsindwa kubera kwifuza amafaranga menshi cyane? 🤑"
-    ],
-    day9: [
-        "Do you check live scores every 5 minutes? 📱⏰",
-        "Urareberaho amanota buri minota 5? 😂",
-        "What's your reaction when the underdog wins? 😱",
-        "Iyo ikipe nto yatsindiye ikipe nini, wumva ute? Urashaka kurira? 😭",
-        "Ever placed a bet you knew was risky? 🎲🔥",
-        "Wigeze gushyira ticket wari uzi ko ari ingorane? 😬",
-        "Do you bet with money you can afford to lose? 💵✅",
-        "Ese urashyira amafaranga ushobora gutakaza nta kibazo? 🤔",
-        "Quick question: Do you celebrate small wins? 🎉",
-        "Iyo utsindiye amafaranga make, urayishimira cyangwa uvuga ngo ni make? 💰"
-    ],
-    day10: [
-        "Do you have a betting budget or just YOLO? 💸😂",
-        "Ese ufite budget yo gushyira ticket cyangwa urashyira uko bishoboka? 🎰",
-        "What's the most goals you've needed and didn't get? ⚽💔",
-        "Ni ibitego bingahe byari bisigaye kugira ngo utsinde? 😓",
-        "Ever blamed the weather for a lost bet? 🌧️😅",
-        "Wigeze gushinja ikirere ko watsinzwe? 'Imvura yangije umukino!' 🤣",
-        "Do you bet on games you're not even watching? 📺❌",
-        "Urashyira ticket ku mikino utarebera? 🙈",
-        "Have you ever won on a random pick? 🎲✨",
-        "Wigeze gutsinda ticket washyize utatekereje cyane? Amahirwe gusa? 🍀"
-    ],
-    day11: [
-        "Do you trust early goals or late drama? ⚽⏰",
-        "Ese wemera ibitego byo hambere cyangwa ibyo mu mpera? 🎭",
-        "What's your biggest win ever? 💰🏆",
-        "Ni amafaranga angahe manini watsindiye? Twabwire! 🤑",
-        "Ever lost a bet in injury time? 😭⏱️",
-        "Wigeze gutsindwa mu gihe cy'inyongera? Byabaye bite? 💔",
-        "Do you bet on corners, cards, or just goals? 📊",
-        "Urashyira ticket kuri corners, amakarita, cyangwa ibitego gusa? 🎯",
-        "Have you ever copied someone's bet and won? 😂✅",
-        "Wigeze kwigana ticket y'umuntu ukatsinda? 🤝"
-    ],
-    day12: [
-        "Do you believe in 'hot streaks'? 🔥",
-        "Ese wemera ko hari igihe 'amafaranga akurikirana'? 🌟",
-        "What's your lucky number for odds? 🍀🔢",
-        "Ni umubare uhe w'odds ukunda cyane? 2.5, 3.0, cyangwa ikindi? 📈",
-        "Ever placed a bet out of boredom? 😴🎲",
-        "Wigeze gushyira ticket kubera umunezero gusa? 😅",
-        "Do you trust your instincts or overthink? 🧠💭",
-        "Ese uremera ibyiyumviro byawe cyangwa utekereza cyane? 🤔",
-        "Have you ever won and forgot to check? 😂💰",
-        "Wigeze gutsinda ukareka kureba ticket yawe? 🙈"
-    ],
-    day13: [
-        "Do you bet on underdogs or favorites? 🐕🦁",
-        "Urashyira ticket ku makipe mato cyangwa manini? 🎯",
-        "What's the worst bad luck you've had? 💀",
-        "Ni amahirwe mabi iki wakorewe mu gushyira ticket? 😭",
-        "Ever won and immediately lost it all? 💸🔄",
-        "Wigeze gutsinda ukongera gutakaza byose ako kanya? 😬",
-        "Do you check odds before or after picking teams? 📊",
-        "Urareberaho odds mbere cyangwa nyuma yo guhitamo amakipe? 🤷",
-        "Have you ever regretted cashing out early? 💰😓",
-        "Wigeze kwicuza ko wakoze cashout vuba cyane? 🤦"
-    ],
-    day14: [
-        "Do you bet more on weekdays or weekends? 📅⚽",
-        "Urashyira ticket nyinshi mu cyumweru cyangwa mu mpera z'icyumweru? 🗓️",
-        "What's your pre-match ritual? 🕯️🙏",
-        "Ese ufite icyo ukora mbere yo gushyira ticket? Gusengera? 😂",
-        "Ever blamed a player for your lost bet? 😤⚽",
-        "Wigeze gushinja umukinnyi ko watsinzwe? 'Yatwiye!' 🤬",
-        "Do you bet on halftime scores? ⏱️",
-        "Urashyira ticket kuri halftime scores cyangwa fulltime gusa? 🎯",
-        "Have you ever won big on a crazy accumulator? 🎰💰",
-        "Wigeze gutsinda amafaranga menshi kuri accumulator nini? 🏆"
-    ],
-    day15: [
-        "Do you trust statistics or just vibes? 📊✨",
-        "Ese uremera statistike cyangwa ibyiyumviro gusa? 🤔",
-        "What's the most teams you've put on one ticket? 🎫",
-        "Ni amakipe angahe watsindiye kuri ticket imwe? 🔢",
-        "Ever lost because of a last-minute goal? ⚽💔",
-        "Wigeze gutsindwa kubera igitego cy'umunota wa nyuma? 😭",
-        "Do you bet on both teams to score? ⚽⚽",
-        "Urashyira ticket 'both teams to score'? Ni strategy nziza? 🎯",
-        "Have you ever won without watching the game? 📺❌",
-        "Wigeze gutsinda utarebereye umukino? Amahirwe! 🍀"
-    ],
-    day16: [
-        "Do you celebrate wins with friends or keep quiet? 🎉🤐",
-        "Iyo utsinda, urabwira inshuti zawe cyangwa urabibika? 🤫",
-        "What's your biggest betting mistake? 🤦‍♂️",
-        "Ni ikosa riki kinini wakoreye mu gushyira ticket? 😅",
-        "Ever placed a bet and forgot about it? 😂",
-        "Wigeze gushyira ticket ukayibagirwa? 🙈",
-        "Do you bet on your gut or research? 🧠🔍",
-        "Urashyira ticket ukurikije ibyiyumviro cyangwa ubushakashatsi? 📚",
-        "Have you ever won on a last-minute decision? ⏰✅",
-        "Wigeze gutsinda ticket washyize mu minota ya nyuma? 🏃"
-    ],
-    day17: [
-        "Do you prefer high risk or safe bets? 🎲🛡️",
-        "Wowe ukunda ingorane cyangwa umutekano? 🤔",
-        "What's the longest losing streak you've had? 💀",
-        "Ni inshuro zingahe zikurikirana watsinzwe? 😭",
-        "Ever won and treated yourself? 💰🎁",
-        "Wigeze gutsinda ukigurira ikintu cyiza? 🛍️",
-        "Do you bet on player props or match results? 👤⚽",
-        "Urashyira ticket kuri player stats cyangwa amanota gusa? 📊",
-        "Have you ever lost on a 'sure thing'? 😂💸",
-        "Wigeze gutsindwa kuri ticket wavuze ko 'izatsinda rwose'? 🤡"
-    ],
-    day18: [
-        "Do you check your ticket during the match? 📱⚽",
-        "Urareberaho ticket yawe mu gihe cy'umukino? 😬",
-        "What's your favorite betting market? 🎯",
-        "Ni market ihe ukunda mu gushyira ticket? Over/Under, Win, cyangwa ikindi? 📈",
-        "Ever lost because you added too many games? 🤦",
-        "Wigeze gutsindwa kubera kongera imikino myinshi? 😅",
-        "Do you trust your friends' tips? 👥💡",
-        "Ese uremera inama z'inshuti zawe? 🤝",
-        "Have you ever won on a hunch? 🔮✨",
-        "Wigeze gutsinda ukurikije ibyiyumviro gusa? 🍀"
-    ],
-    day19: [
-        "Do you bet on live games or pre-match? ⚡📅",
-        "Urashyira ticket mu mikino iri gukinwa cyangwa mbere? 🎯",
-        "What's the craziest bet you've ever placed? 🤪",
-        "Ni ticket ihe y'ubuziranenge watsindiye? 😂",
-        "Ever won and kept betting until you lost? 🔄💸",
-        "Wigeze gutsinda ukomeza gushyira kugeza watsinzwe? 😭",
-        "Do you bet on international or local leagues? 🌍🏠",
-        "Urashyira ticket kuri international leagues cyangwa local gusa? ⚽",
-        "Have you ever regretted not betting? 🤔💭",
-        "Wigeze kwicuza ko utashyize ticket? 'Yari izatsinda!' 😓"
-    ],
-    day20: [
-        "Do you have a betting strategy or wing it? 📋🎲",
-        "Ese ufite strategy yo gushyira ticket cyangwa urashyira uko bishoboka? 🤷",
-        "What's your reaction to a draw? 😐",
-        "Iyo umukino urangiye 0-0, wumva ute? Urashaka kurira? 😭",
-        "Ever blamed the coach for your lost bet? 😂👨‍🏫",
-        "Wigeze gushinja umutoza ko watsinzwe? 'Strategy ye yari mbi!' 🤬",
-        "Do you bet on first goalscorer? ⚽🥇",
-        "Urashyira ticket kuri 'first goalscorer'? Ni ingorane! 🎯",
-        "Have you ever won big and stayed humble? 💰😇",
-        "Wigeze gutsinda amafaranga menshi ukomeza kwigira icyubahiro? 🙏"
-    ],
-    day21: [
-        "Do you trust big teams or look for upsets? 🦁🐕",
-        "Ese uremera amakipe manini cyangwa urashakisha surprises? 😮",
-        "What's the most you've ever lost in one day? 💸",
-        "Ni amafaranga angahe watakaje umunsi umwe? 😓",
-        "Ever won and told everyone? 📢💰",
-        "Wigeze gutsinda ukabwira abantu bose? 😂",
-        "Do you bet on cup games or league matches? 🏆📊",
-        "Urashyira ticket kuri cup games cyangwa league gusa? ⚽",
-        "Have you ever lost on the last game? 💔",
-        "Wigeze gutsindwa n'umukino wa nyuma gusa? 😭"
-    ],
-    day22: [
-        "Do you bet with your head or follow the crowd? 🧠🐑",
-        "Urashyira ticket ukurikije ubwenge bwawe cyangwa itsinda? 🤔",
-        "What's your favorite odds range? 🔢",
-        "Ni odds zingana iki ukunda? 1.5-2.0, 2.0-3.0, cyangwa zirenga 3.0? 📈",
-        "Ever won on a team you've never heard of? 😂⚽",
-        "Wigeze gutsinda kuri ikipe utigeze kumva? 🌍",
-        "Do you bet on goals or clean sheets? ⚽🧤",
-        "Urashyira ticket kuri goals cyangwa clean sheets? 🎯",
-        "Have you ever celebrated and then lost? 🎉💔",
-        "Wigeze kwishimira mbere yuko umukino urangira ukatsindwa? 😭"
-    ],
-    day23: [
-        "Do you check team news before betting? 📰",
-        "Urareberaho amakuru y'ikipe mbere yo gushyira ticket? 🔍",
-        "What's the earliest you've placed a bet? ⏰",
-        "Ni igihe kingana iki cyo hambere washyize ticket? Iminsi mbere? 📅",
-        "Ever lost because of a penalty miss? 😭🥅",
-        "Wigeze gutsindwa kubera penalty yanze? 💔",
-        "Do you bet on Asian handicaps? 🌏📊",
-        "Urashyira ticket kuri Asian handicap? Ni strategy nziza? 🎯",
-        "Have you ever won without trying? 🍀",
-        "Wigeze gutsinda utatekereje cyane? Amahirwe gusa? ✨"
-    ],
-    day24: [
-        "Do you bet more when you're confident? 💪💰",
-        "Iyo wizeye cyane, urashyira amafaranga menshi? 🤑",
-        "What's your worst betting habit? 🤦",
-        "Ni imyitwararire ibi ukunda mu gushyira ticket? 😅",
-        "Ever won and immediately withdrew? 💰✅",
-        "Wigeze gutsinda ukakuramo amafaranga ako kanya? 🏦",
-        "Do you bet on total corners? 📐",
-        "Urashyira ticket kuri total corners? Ni market nziza? ⚽",
-        "Have you ever lost on a technicality? 😤",
-        "Wigeze gutsindwa kubera amategeko? 'Yari goal!' 🤬"
-    ],
-    day25: [
-        "Do you trust your luck or your knowledge? 🍀🧠",
-        "Ese uremera amahirwe yawe cyangwa ubumenyi bwawe? 🤔",
-        "What's the most games you've won in a row? 🔥",
-        "Ni imikino ingahe watsindiye ikurikirana? 🏆",
-        "Ever bet against your favorite team? 💔⚽",
-        "Wigeze gushyira ticket urwanya ikipe ukunda? 😬",
-        "Do you bet on yellow cards? 🟨",
-        "Urashyira ticket kuri yellow cards? Ni ingorane! 📊",
-        "Have you ever won and felt guilty? 😅💰",
-        "Wigeze gutsinda ukumva wicuza? 'Yari lucky!' 🍀"
-    ],
-    day26: [
-        "Do you bet every weekend or take breaks? 📅",
-        "Urashyira ticket buri mpera z'icyumweru cyangwa uraruhuka? 🛋️",
-        "What's your go-to betting app? 📱",
-        "Ni app ihe ukoresha mu gushyira ticket? 💻",
-        "Ever lost and blamed the app? 😂📱",
-        "Wigeze gutsindwa ukashinja app? 'Yanze gukora!' 🤬",
-        "Do you bet on red cards? 🟥",
-        "Urashyira ticket kuri red cards? Ni strategy nziza? ⚽",
-        "Have you ever won on a wild guess? 🎲✨",
-        "Wigeze gutsinda ukurikije guess gusa? 🤷"
-    ],
-    day27: [
-        "Do you analyze head-to-head stats? 📊",
-        "Urareberaho statistike z'amakipe mbere yo gushyira ticket? 🔍",
-        "What's the biggest odds you've ever won? 🎰",
-        "Ni odds zingana iki manini watsindiye? 💰",
-        "Ever lost because you changed your mind? 🤦",
-        "Wigeze gutsindwa kubera guhindura ibyo wari utekereje? 😅",
-        "Do you bet on offsides? 🚩",
-        "Urashyira ticket kuri offsides? Ni market nziza? ⚽",
-        "Have you ever won and felt unstoppable? 💪🔥",
-        "Wigeze gutsinda ukumva nta kintu gishobora kuguhagarika? 😎"
-    ],
-    day28: [
-        "Do you bet on possession stats? ⚽📊",
-        "Urashyira ticket kuri possession? Ni strategy nziza? 🎯",
-        "What's your biggest 'what if' moment? 🤔",
-        "Ni iki cyaguhungabanije cyane? 'Niba nashyize...' 😭",
-        "Ever won on a team's first game? 🆕⚽",
-        "Wigeze gutsinda kuri umukino wa mbere w'ikipe? 🏆",
-        "Do you bet on shots on target? 🎯",
-        "Urashyira ticket kuri shots on target? 📈",
-        "Have you ever lost and laughed about it? 😂💸",
-        "Wigeze gutsindwa ukaseka? 'Ni joke!' 🤡"
-    ],
-    day29: [
-        "Do you bet on free kicks? ⚽",
-        "Urashyira ticket kuri free kicks? Ni ingorane! 🎯",
-        "What's your betting motto? 💭",
-        "Ni iyihe nteruro ukurikiza mu gushyira ticket? 📝",
-        "Ever won and felt like a pro? 😎💰",
-        "Wigeze gutsinda ukumva uri professional? 🏆",
-        "Do you bet on throw-ins? 🤾",
-        "Urashyira ticket kuri throw-ins? Ni market nziza? ⚽",
-        "Have you ever lost and vowed to quit? 😭🚪",
-        "Wigeze gutsindwa ukavuga ko 'ndeka gushyira ticket'? 🛑"
-    ],
-    day30: [
-        "Do you bet on substitutions? 🔄",
-        "Urashyira ticket kuri substitutions? Ni strategy nziza? ⚽",
-        "What's your biggest betting dream? 💭💰",
-        "Ni iki cyiza ukwifuza mu gushyira ticket? 🌟",
-        "Ever won and bought something crazy? 🛍️😂",
-        "Wigeze gutsinda ukigura ikintu cy'ubuziranenge? 🎁",
-        "Do you bet on fouls? 🤕",
-        "Urashyira ticket kuri fouls? Ni market nziza? 📊",
-        "Have you ever lost and come back stronger? 💪🔥",
-        "Wigeze gutsindwa ukagaruka ukomeye? 🏆"
-    ],
-    day31: [
-        "Do you bet on goalkeeper saves? 🧤",
-        "Urashyira ticket kuri goalkeeper saves? Ni ingorane! ⚽",
-        "What's your final betting advice? 💡",
-        "Ni iyihe nama ugira abantu mu gushyira ticket? 🎯",
-        "Ever won on the last day of the month? 📅💰",
-        "Wigeze gutsinda umunsi wa nyuma w'ukwezi? 🏆",
-        "Do you bet on match duration? ⏱️",
-        "Urashyira ticket kuri match duration? Ni strategy nziza? 📊",
-        "Have you ever lost and still smiled? 😊💸",
-        "Wigeze gutsindwa ukomeza kumwenyura? 'Ni game!' 🎮"
-    ]
+
+day1: [
+"Are you placing a ticket today or watching others win? 👀",
+"Ni iki cyaguteye gutangira betting bwa mbere? 🎯",
+"Be honest… do you say 'last ticket' and then place 3 more? 😂",
+"Ujya wumva betting iguha confidence mu buzima busanzwe? 😎",
+"What's your betting personality: Calculator 🧠 or Gambler 🎲?",
+"Wigeze gutsinda ukicecekera ntubibwire umuntu? 🤫",
+"How many times have you said: 'This one is 100% sure'? 💀",
+"Ni iki kikurangaza cyane mbere yo gushyira ticket? 📱",
+"When you win, do you feel like a genius? 🏆😂",
+"Ujya wiyemeza budget ya buri kwezi cyangwa ujya uko byaje? 💰"
+],
+
+day2: [
+"Do you check your ticket 100 times before kickoff? 📱",
+"Wigeze gutsinda nubwo wari wizeye ko uri butsindwe? 😅",
+"What's worse: losing by one goal or one card? 😤",
+"Ni iki cyagutunguye cyane mu gutsinda kwawe? 😲",
+"Have you ever celebrated too early? 😂",
+"Ujya utekereza kureka betting burundu? 🤯",
+"Do you prefer singles or accumulators? 🎯",
+"Ni nde muntu uzi ko akunda betting kukurusha? 😂",
+"Do you trust low odds or chase big ones? 🔥",
+"Wigeze gutsinda amafaranga atuma uhindura gahunda z'umunsi? 💸"
+],
+
+day3: [
+"Ever followed the crowd and regretted it? 🐑",
+"Ujya ubika inyungu yawe cyangwa urongera wagera? 💰",
+"Do you enjoy the risk or the reward more? 🎲",
+"Ni ryari betting yaguhaye stress kurusha umunezero? 😩",
+"Have you ever ignored your research? 🤦",
+"Wigeze gutinya gushyira stake nini ariko birangira utsinze? 😎",
+"Do you bet more when confident? 💪",
+"Ni iki kigutera kongera kugerageza nyuma yo gutsindwa? 🔥",
+"Have you ever doubled your stake after losing? 😭",
+"Ujya ufata betting nk'ishoramari cyangwa nk'imyidagaduro? 🎭"
+],
+
+day4: [
+"Do you believe in lucky numbers? 🍀",
+"Wigeze gutsindwa kubera red card? 🟥",
+"Ever lost on injury time? 💔",
+"Ni iki kigutera kwiyizera cyane mbere y'umukino? 😎",
+"Do you bet emotionally? ❤️",
+"Ujya ugenzura history yawe ya betting? 📊",
+"Have you ever withdrawn profits immediately? 💰",
+"Wigeze gutsinda consecutive days? 🔥",
+"Do you plan weekly or daily? 📅",
+"Ni iki wize gikomeye muri betting? 📚"
+],
+
+day5: [
+"Have you ever won without watching the match? 📺",
+"Ujya utekereza ko amahirwe ari ku ruhande rwawe? 🍀",
+"Do you bet on teams you don't know? 🌍",
+"Wigeze gutsindwa ku munota wa nyuma? 😭",
+"What's your biggest comeback story? 🔥",
+"Ni nde muntu ugutera morale mu gihe utsinzwe? 🤝",
+"Do you fear high odds? 🎰",
+"Ujya ubara ROI yawe cyangwa ntubyiteho? 🧮",
+"Have you ever smiled after losing? 😂",
+"Wumva betting igufasha kwihangana? 💪"
+],
+
+day6: [
+"Do you ever bet just for fun with small money? 😅",
+"Wigeze gushyira amafaranga yose kuri ticket imwe? 😳",
+"What’s your biggest betting regret? 💔",
+"Ni iki gituma wongera kugaruka nubwo watsinzwe? 🔥",
+"Do you celebrate small wins? 🥳",
+"Ujya utekereza ko amahirwe ari ku ruhande rwawe? 🍀",
+"Have you ever copied someone’s ticket blindly? 👀",
+"Ni nde muntu utuma uhindura decision yawe? 🤔",
+"Do you track your losses? 📊",
+"Wigeze guhagarika betting igihe runaka? ⏸️"
+],
+
+day7: [
+"Is betting a hobby or a hustle for you? 💼",
+"Wigeze gushidikanya ku mikino yawe ariko ugakomeza? 😅",
+"Do you ever bet when bored? 💤",
+"Ni ryari betting iguha stress kurusha umunezero? 😩",
+"Have you ever felt 'today is my day'? 🔥",
+"Ujya utegura budget ya betting cyangwa ujya uko byaje? 💰",
+"What’s your safe odds range? 📈",
+"Wigeze gutekereza kureka betting burundu? 🤯",
+"Do you bet more on weekends? 🎉",
+"Ni iki kigutera confidence mbere yo gushyira ticket? 😎"
+],
+
+day8: [
+"Have you ever risked everything for one big win? 🎯",
+"Ujya ubeta ku mutima cyangwa ku mutwe? 🧠",
+"Do you believe in patterns? 🔄",
+"Ni ryari waherukaga gutsinda bikagutangaza? 😲",
+"Would you rather win small daily or big once a month? 💸",
+"Wigeze gutsindwa ariko wumva wari wize lesson? 📚",
+"Do you watch stats before betting? 📊",
+"Ni nde muntu uguhora hafi mu gihe utsinzwe? 🤝",
+"Have you ever missed placing a winning ticket? 😭",
+"Ujya uvuga ngo amahirwe azagaruka ejo? 😂"
+],
+
+day9: [
+"Do you ever bet without checking lineups? 📝",
+"Wigeze gutinya gushyira ticket ariko ikaza gutsinda? 😅",
+"What's your reaction after 2 losses in a row? 😤",
+"Ni iki gituma wongera stake yawe? 💰",
+"Have you ever cashed out too early? 😩",
+"Wigeze kwishimira gutsindwa kuko stake yari nto? 😆",
+"Do you trust big teams more? 🏆",
+"Ni ryari waherukaga gutsinda big surprise? 😮",
+"Have you ever predicted a crazy score? ⚽",
+"Ujya wumva betting ari isomo rikomeye? 🎓"
+],
+
+day10: [
+"Is betting your main income or side fun? 💼",
+"Wigeze gusaba inama mbere yo gushyira ticket? 🤔",
+"Do you set a daily limit? 🚫",
+"Ni iki cyaguteye gutangira betting bwa mbere? 🎯",
+"Have you ever taken a break after big loss? 🧘",
+"Ujya wumva gutsinda ari reward y'ihangana? 💪",
+"Do you bet with emotion? ❤️",
+"Wigeze gukurikira gut feeling aho gukurikira stats? 🔥",
+"Have you ever woken up to unexpected profit? 💰",
+"Ni iki kigushimisha cyane: gutsinda cyangwa gutanga prediction? 😎"
+],
+
+day11: ["Do you prefer long-term strategy? 📈","Ujya ubeta bitewe n'ibitekerezo by’abandi? 👂","Have you ever ignored red flags? 🚩","Ni iki kigutera gutinyuka risk nini? 🎲","Do you calculate ROI? 🧮","Wigeze gutekereza ku nyungu ya buri kwezi? 💰","Have you ever chased losses? 😬","Ni iki kigutera guhagarara nyuma yo gutsindwa? 🛑","Do you enjoy the thrill? 🔥","Betting iguha adrenaline? 😅"],
+
+day12: ["Have you ever bet during work? 🤫","Ujya ureba match live cyangwa ukareba result gusa? 📺","Do you feel pressure when others win? 😤","Ni ryari betting yaguhaye lesson ikomeye? 📚","Have you ever withdrawn profits wisely? 💰","Ujya ubara risk mbere yo gushyira ticket? 🧠","Do you bet daily? 📅","Ni iki kigutera kuruhuka igihe runaka? 🧘","Have you hit a jackpot before? 🎉","Ujya urota gutsinda runini? 😎"],
+
+day13: ["Do you prefer morning or night bets? 🌙","Wigeze gutsindwa minute ya nyuma? 😭","Have you ever felt unstoppable? 🔥","Ni iki gituma utekereza ko uyu munsi ari uwawe? 💪","Do you compare odds often? 📊","Ujya ubaza abandi mbere yo gushyira stake nini? 🤔","Have you lost confidence before? 😅","Ni nde muntu uzi ko akunda betting kukurusha? 😂","Do you bet on instinct? 🎲","Wigeze gutsindwa ariko ukavuga ngo next time? 😆"],
+
+day14: ["Do you save part of your winnings? 💰","Ujya wumva betting ari entertainment gusa? 🎭","Have you ever risked rent money? 😳","Ni iki cyakubabaje cyane mu betting? 💔","Do you analyze trends? 📈","Wigeze gukurikira system y'undi muntu? 🤝","Have you learned discipline? 🧠","Ni iki gituma wongera kugaruka buri munsi? 🔁","Do you prefer underdogs? 🐶","Wigeze gutsinda ikipe itari favorite? 😮"],
+
+day15: ["Have you ever bet on a derby? ⚽","Ujya uteganya igihe cyo kubeta? ⏰","Do you fear last-minute goals? 😬","Ni ryari betting yakunejeje cyane? 😄","Have you ever doubled after win? 🤑","Ujya utinya guhomba byinshi icyarimwe? 🤯","Do you track monthly results? 📊","Ni iki cyagutunguye cyane mu betting? 😲","Have you inspired someone to bet? 😎","Ujya ufata betting nk'ubucuruzi? 💼"],
+
+day16: ["Do you believe experience beats luck? 🎯","Wigeze gutsindwa kubera gutinda gushyira ticket? ⏳","Have you ever missed a huge odd? 😭","Ni iki gituma wongera kugerageza? 🔥","Do you set profit goals? 📈","Ujya usangira inyungu n'inshuti? 😆","Have you ever felt addicted? 😅","Ni iki kigutera gukomeza no gutsindwa? 💪","Do you bet strategically? 🧠","Wigeze gutsinda utabiteganyije? 😎"],
+
+day17: ["Do you feel nervous before kickoff? 😬","Ni ryari waherukaga gutsinda consecutively? 🔥","Have you ever trusted wrong tipster? 🤦","Ujya wemera amakosa yawe mu betting? 🤔","Do you believe in bankroll management? 💰","Ni iki gituma wongera stake yawe? 🤑","Have you ever won big unexpectedly? 🎉","Ujya ugenzura history yawe? 📊","Do you plan weekly strategy? 📅","Ni iki kigutera kwiyizera cyane? 😎"],
+
+day18: ["Do you prefer pre-match or live betting? ⚽","Wigeze gushyira ticket kubera hype gusa? 😅","Have you ever cashed out at perfect time? ⏰","Ni iki kigutera gutinya cashout? 😬","Do you calculate risk percentage? 📊","Ujya ubeta nubwo utizeye neza? 🤷","Have you ever celebrated too early? 😂","Ni iki cyaguteye kwiga byinshi kuri betting? 📚","Do you bet alone mostly? 🤔","Wigeze gutsinda kubera gutekereza cyane? 🧠"],
+
+day19: ["Do you feel lucky today? 🍀","Ni iki kigutera kubeta cyane weekend? 🎉","Have you ever predicted exact score? 🎯","Wigeze gutsindwa ariko wumva wari hafi gutsinda? 😭","Do you prefer safe combos? 🔒","Ni iki cyaguteye gutangira betting? 💡","Have you ever learned from losses? 📖","Ujya ubika inyungu yawe? 💰","Do you bet emotionally sometimes? ❤️","Wigeze kwifuza kureka betting? 😅"],
+
+day20: ["Do you enjoy analyzing stats? 📊","Wigeze gushyira amafaranga menshi cyane? 😳","Have you ever trusted gut feeling? 🔥","Ni nde muntu uzi ko ari expert muri betting? 😎","Do you bet small consistently? 💰","Ujya wumva betting iguha confidence? 💪","Have you ever lost by one goal? 😭","Ni iki cyagutunguye cyane mu gutsinda? 😲","Do you chase big odds? 🎰","Wigeze gutsinda runini mu buryo butunguranye? 🎉"],
+
+day21: ["Do you believe in momentum? 🔄","Wigeze gutsindwa kubera red card? 🟥","Have you ever risked too much? 😬","Ni iki kigutera kuruhuka nyuma yo gutsindwa? 🧘","Do you bet with strategy? 📈","Wigeze gutsinda consecutive days? 🔥","Have you ever followed hype blindly? 👀","Ni nde ukugira inama mbi? 😂","Do you review past tickets? 📊","Ujya ubara inyungu zawe neza? 💰"],
+
+day22: ["Do you feel confident today? 😎","Ni iki kigutera gushidikanya? 🤔","Have you ever celebrated before full time? 😂","Wigeze gutsindwa ku munota wa nyuma? 😭","Do you bet more when winning? 🤑","Ni iki cyaguteye kwinjira muri betting? 🎯","Have you ever ignored stats? 📊","Ujya ugenzura odds buri kanya? 📱","Do you feel pressure to win? 😤","Wigeze gutsinda utiteze? 😮"],
+
+day23: ["Do you enjoy weekend betting more? 🎉","Ni ryari betting yaguhaye stress nyinshi? 😩","Have you ever withdrawn big profit? 💰","Wigeze gutinya gushyira stake nini? 😬","Do you prefer calculated risks? 🧠","Ni iki gituma wongera confidence? 💪","Have you ever lost trust in predictions? 🤦","Ujya usaba inama inshuti? 🤝","Do you set monthly targets? 📅","Wigeze gutsinda bikagutangaza? 😲"],
+
+day24: ["Do you feel addicted sometimes? 😅","Ni iki gituma utekereza ko amahirwe ari ku ruhande rwawe? 🍀","Have you ever hit your biggest win? 🎉","Wigeze gutsindwa ariko ukavuga ngo lesson learned? 📚","Do you bet consistently? 📊","Ni nde ukugira inama nziza? 😎","Have you ever taken a long break? 🧘","Ujya ubika inyungu? 💰","Do you feel confident after small win? 😏","Wigeze gutsinda utabiteganyije? 😮"],
+
+day25: ["Do you trust experience over luck? 🎯","Wigeze gukurikira advice mbi? 😅","Have you ever risked savings? 😬","Ni iki cyaguteye gukomeza no gutsindwa? 🔥","Do you bet smart or bold? 🧠","Wigeze gutsinda ku munota wa nyuma? 😭","Have you ever tracked performance? 📊","Ni iki gituma wongera stake? 💰","Do you prefer small consistent profit? 📈","Wigeze gutsinda big surprise? 😲"],
+
+day26: ["Do you feel strategic today? 😎","Ni iki cyagutunguye cyane mu betting? 😮","Have you ever regretted cashing out? 😭","Wigeze gutsinda big unexpectedly? 🎉","Do you analyze form? 📊","Ni nde muntu uzi betting kukurusha? 😂","Have you ever chased losses emotionally? 😬","Ujya ugenzura bankroll yawe? 💰","Do you bet patiently? ⏳","Wigeze gutsinda consecutive days? 🔥"],
+
+day27: ["Do you love the thrill? 🎲","Ni iki gituma betting ikunezeza? 😄","Have you ever felt unlucky? 😅","Wigeze gutsinda nubwo utizeye? 😲","Do you bet every day? 📅","Ni ryari waherukaga gutsinda runini? 💰","Have you ever doubled stake after loss? 😬","Ujya wumva betting ari ubucuruzi? 💼","Do you track wins weekly? 📊","Wigeze gutsinda ku buryo butangaje? 🎉"],
+
+day28: ["Do you feel lucky this week? 🍀","Ni iki kigutera confidence uyu munsi? 😎","Have you ever bet without research? 😅","Wigeze gutsindwa kubera gutinda? ⏳","Do you trust statistics? 📊","Ni iki gituma wongera kugerageza? 🔥","Have you ever hit jackpot? 🎉","Ujya wumva betting iguha stress? 😩","Do you stay disciplined? 🧠","Wigeze gutsinda bikagutangaza? 😮"],
+
+day29: ["Do you believe today is your day? 🔥","Ni iki gituma wongera stake? 💰","Have you ever felt unstoppable? 😎","Wigeze gutsindwa ariko wumva wari hafi gutsinda? 😭","Do you prefer safe bets? 🔒","Ni nde ukugira inama nziza? 🤝","Have you ever celebrated too early? 😂","Ujya ubara inyungu zawe neza? 📊","Do you chase big wins? 🎯","Wigeze gutsinda ku buryo butunguranye? 🎉"],
+
+day30: ["Do you review your monthly performance? 📅","Ni iki wize muri betting uku kwezi? 📚","Have you reached your goals? 🎯","Wigeze gutsindwa ariko ukiga lesson? 😅","Do you feel proud of your discipline? 💪","Ni iki uzahindura mu kwezi gutaha? 🔄","Have you improved strategy? 📈","Ujya utegura intego nshya? 🧠","Ready for next month challenge? 🔥","Wumva uzatsinda kurusha uku kwezi? 😎"],
+
+day31: ["Last day of the month — did you win more than you lost? 💰","Ni iki cyagushimishije cyane muri uku kwezi? 😄","Have you grown smarter in betting? 🧠","Wigeze gutsindwa ariko bikaguhindura? 📚","Would you change anything? 🔄","Ni iki uzakora differently ukwezi gutaha? 🎯","Are you ready to level up? 🚀","Ujya wumva betting igufasha kwiyizera? 💪","Did discipline help you? 📊","Ukwezi gutaha uzinjira ufite strategy nshya? 🔥"]
 };
+

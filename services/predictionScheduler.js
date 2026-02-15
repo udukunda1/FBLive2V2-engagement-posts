@@ -1,6 +1,7 @@
 import Match from '../models/Match.js';
 import Team from '../models/Team.js';
 import axios from 'axios';
+import { likeAndCommentOnFacebook } from '../utils/facebookInteractions.js';
 
 // Store active prediction timeouts
 const activePredictionTimeouts = new Map();
@@ -99,7 +100,16 @@ async function handlePredictionPost(matchId) {
         const message = await formatPredictionPost(match, prediction);
 
         // Post to Facebook
-        await postPredictionToFacebook(message);
+        const postId = await postPredictionToFacebook(message);
+
+        // Like and comment on the post
+        if (postId) {
+            await likeAndCommentOnFacebook(postId, message, {
+                type: 'prediction',
+                match: `${match.homeTeam} vs ${match.awayTeam}`,
+                prediction: prediction
+            });
+        }
 
         console.log(`✅ Prediction posted: ${match.homeTeam} vs ${match.awayTeam} - ${prediction}`);
 
@@ -129,9 +139,20 @@ export async function schedulePredictionPosts() {
         const now = new Date();
 
         scheduledMatches.forEach((match, index) => {
-            // Calculate delay: 6 hours for first match, 7 for second, etc.
-            const hoursDelay = 6 + index;
-            const delayMs = hoursDelay * 60 * 60 * 1000;
+            // Calculate posting time: 06:00, 07:00, 08:00, etc. UTC
+            const postHour = 6 + index;
+            const postTime = new Date();
+            postTime.setUTCHours(postHour, 0, 0, 0);
+
+            // If the time has already passed today, skip this prediction
+            if (postTime <= now) {
+                console.log(`⏭️  Skipped prediction ${index + 1} (time already passed: ${postHour}:00 UTC)`);
+                return;
+            }
+
+            const delayMs = postTime - now;
+            const hoursUntil = Math.floor(delayMs / (60 * 60 * 1000));
+            const minutesUntil = Math.floor((delayMs % (60 * 60 * 1000)) / (60 * 1000));
 
             // Schedule the prediction post
             const timeoutId = setTimeout(async () => {
@@ -145,7 +166,7 @@ export async function schedulePredictionPosts() {
             match.predictionScheduled = true;
             match.save();
 
-            console.log(`⏰ Prediction scheduled: ${match.homeTeam} vs ${match.awayTeam} in ${hoursDelay} hours`);
+            console.log(`⏰ Prediction scheduled: ${match.homeTeam} vs ${match.awayTeam} at ${postHour}:00 UTC (in ${hoursUntil}h ${minutesUntil}m)`);
         });
 
         console.log(`✅ Scheduled ${scheduledMatches.length} prediction posts\n`);
@@ -183,15 +204,20 @@ export async function reschedulePendingPredictions() {
         }
 
         const now = new Date();
+        let scheduledCount = 0;
 
         matches.forEach((match, index) => {
-            // Calculate delay: 6 hours for first match, 7 for second, etc.
-            const hoursDelay = 6 + index;
-            const delayMs = hoursDelay * 60 * 60 * 1000;
+            // Calculate posting time: 06:00, 07:00, 08:00, etc. UTC
+            const postHour = 6 + index;
+            const postTime = new Date();
+            postTime.setUTCHours(postHour, 0, 0, 0);
 
             // Only schedule if the prediction time hasn't passed yet
-            const predictionTime = new Date(now.getTime() + delayMs);
-            if (predictionTime > now) {
+            if (postTime > now) {
+                const delayMs = postTime - now;
+                const hoursUntil = Math.floor(delayMs / (60 * 60 * 1000));
+                const minutesUntil = Math.floor((delayMs % (60 * 60 * 1000)) / (60 * 1000));
+
                 // Schedule the prediction post
                 const timeoutId = setTimeout(async () => {
                     await handlePredictionPost(match._id);
@@ -204,11 +230,16 @@ export async function reschedulePendingPredictions() {
                 match.predictionScheduled = true;
                 match.save();
 
-                console.log(`⏰ Prediction re-scheduled: ${match.homeTeam} vs ${match.awayTeam} in ${hoursDelay} hours`);
+                console.log(`⏰ Prediction re-scheduled: ${match.homeTeam} vs ${match.awayTeam} at ${postHour}:00 UTC (in ${hoursUntil}h ${minutesUntil}m)`);
+                scheduledCount++;
             }
         });
 
-        console.log(`✅ Re-scheduled ${matches.length} prediction posts\n`);
+        if (scheduledCount === 0) {
+            console.log('📭 No predictions to re-schedule (all times have passed)');
+        } else {
+            console.log(`✅ Re-scheduled ${scheduledCount} prediction posts\n`);
+        }
     } catch (error) {
         console.error('❌ Error re-scheduling prediction posts:', error.message);
     }

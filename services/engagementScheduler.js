@@ -1,5 +1,6 @@
 import { engagementPosts } from '../data/engagementPosts.js';
 import axios from 'axios';
+import { likeAndCommentOnFacebook } from '../utils/facebookInteractions.js';
 
 // Store active engagement post timeouts
 const activeEngagementTimeouts = new Map();
@@ -47,7 +48,12 @@ async function postEngagementToFacebook(message) {
 async function handleEngagementPost(question, index) {
     try {
         // Post to Facebook
-        await postEngagementToFacebook(question);
+        const postId = await postEngagementToFacebook(question);
+
+        // Like and comment on the post
+        if (postId) {
+            await likeAndCommentOnFacebook(postId, question, { type: 'engagement' });
+        }
 
         console.log(`✅ Engagement post ${index + 1}/10 published`);
 

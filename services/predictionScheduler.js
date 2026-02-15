@@ -137,6 +137,7 @@ export async function schedulePredictionPosts() {
         }
 
         const now = new Date();
+        let scheduledCount = 0;
 
         scheduledMatches.forEach((match, index) => {
             // Calculate posting time: 06:00, 07:00, 08:00, etc. UTC
@@ -167,9 +168,14 @@ export async function schedulePredictionPosts() {
             match.save();
 
             console.log(`⏰ Prediction scheduled: ${match.homeTeam} vs ${match.awayTeam} at ${postHour}:00 UTC (in ${hoursUntil}h ${minutesUntil}m)`);
+            scheduledCount++;
         });
 
-        console.log(`✅ Scheduled ${scheduledMatches.length} prediction posts\n`);
+        if (scheduledCount === 0) {
+            console.log('📭 No predictions scheduled (all times have passed)\n');
+        } else {
+            console.log(`✅ Scheduled ${scheduledCount} prediction posts\n`);
+        }
     } catch (error) {
         console.error('❌ Error scheduling prediction posts:', error.message);
     }

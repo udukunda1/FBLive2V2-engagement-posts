@@ -236,8 +236,8 @@ export const engagementPosts = {
         "Ni uwuhe mukinnyi uzi ukina mu ikipe y'abagore?",
         "Do you like cashout? 🏟️",
         "Ese wigeze ukora amapari arenze 5 ku munsi? 🧠",
-        "USA Women's Team: Are they still dominant or has Europe caught up? ",
-        "Iyo urebye iterambere ry'umupira w'abagore, ubona bizagenda bite mu myaka 5? 📅",
+        "Best Midfield Duo in history: Xavi & Iniesta or Modric & Kroos? ⚔️ ",
+        "Ese ubona Arsenal ifite imbaraga zo gutwara igikombe cyangwa bizarangira bigoranye? 📉",
         "Best Women's League: WSL (England) or NWSL (USA)? 🌍",
         "Ni uwuhe mukinnyi ubona ukwiye guhabwa 'Contract' nshya ako kanya? 📝"
     ],
